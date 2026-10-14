@@ -1,0 +1,6 @@
+finished runs/tune/s1_linear_bce
+finished runs/tune/s1_linear_wgan_gp
+finished runs/tune/s1_softmax_bce
+finished runs/tune/s1_softmax_wgan_gp
+finished runs/tune/s1_gumbel_bce
+finished runs/tune/s1_gumbel_wgan_gp

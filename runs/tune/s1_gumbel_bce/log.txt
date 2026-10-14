@@ -1,0 +1,15 @@
+real rows for eval: 39073  generator train rows: 31258  held out: 7815
+params: {'generator_total': 159659, 'generator_quantum': 64, 'discriminator': 94209}
+epoch   10  G 0.746  D 1.285  37s
+epoch   20  G 0.865  D 1.241  85s
+epoch   30  G 1.034  D 1.167  144s
+epoch   40  G 1.168  D 0.983  208s
+ML utility diff (real - synthetic):
+        acc     auc      f1
+lr  4.1075  0.0866  0.2161
+dt  4.3890  0.2305  0.2846
+rf  9.2131  0.5082  0.3503
+mean diff: {'acc': 5.9032, 'auc': 0.2751, 'f1': 0.2837}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.1571, 'avg_jsd': 0.4415, 'diff_corr': 3.3514}
+paper-as-written defs: {'avg_js_divergence': 0.2499, 'avg_abs_pearson_diff': 0.1206}
+done in 216s -> runs/tune/s1_gumbel_bce

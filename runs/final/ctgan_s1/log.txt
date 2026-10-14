@@ -1,0 +1,11 @@
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+        acc     auc      f1
+lr   3.3985  0.0384  0.1352
+dt   6.5616  0.0850  0.0859
+rf   7.2167  0.0490  0.2304
+mlp  3.0095  0.0377  0.0726
+svm  4.6985  0.0826  0.1950
+mean diff {'acc': 4.97696795987307, 'auc': 0.05854168012092773, 'f1': 0.1438246412184919} stat {'avg_wd': 0.011298135750002195, 'avg_jsd': 0.10831938510140392, 'diff_corr': 0.6243130436112571}

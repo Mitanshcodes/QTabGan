@@ -1,0 +1,23 @@
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_classification.py:1879: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_classification.py:1879: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_classification.py:1879: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+marginals {'acc': 9.3357, 'auc': 0.3365, 'f1': 0.2758} {'avg_wd': 0.0007, 'avg_jsd': 0.0061, 'diff_corr': 2.7105} {'avg_js_divergence': 0.0001, 'avg_abs_pearson_diff': 0.0757}
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+real_copy {'acc': 0.1802, 'auc': 0.0011, 'f1': 0.0009} {'avg_wd': 0.0004, 'avg_jsd': 0.0022, 'diff_corr': 0.029} {'avg_js_divergence': 0.0, 'avg_abs_pearson_diff': 0.0018}
+real-data scores per classifier:
+          acc     auc      f1
+lr   80.4688  0.8163  0.6527
+dt   81.2877  0.7480  0.7456
+rf   86.2422  0.9095  0.7980
+mlp  83.6421  0.8923  0.7580
+svm  81.5027  0.8761  0.6595

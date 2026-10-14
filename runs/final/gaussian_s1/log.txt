@@ -1,0 +1,32 @@
+real rows for eval: 48842  generator train rows: 39073  held out: 9769
+params: {'generator_total': 159595, 'generator_quantum': 0, 'discriminator': 94209}
+epoch   10  G 0.224  D -0.313  26s
+epoch   20  G 1.468  D -0.351  51s
+epoch   30  G 1.838  D -0.407  87s
+epoch   40  G 2.372  D -0.325  131s
+epoch   50  G 2.780  D -0.208  186s
+epoch   60  G 3.652  D -0.253  234s
+epoch   70  G 4.008  D -0.305  284s
+epoch   80  G 4.348  D -0.275  334s
+epoch   90  G 4.394  D -0.279  383s
+epoch  100  G 4.385  D -0.223  435s
+epoch  110  G 3.872  D -0.154  486s
+epoch  120  G 4.170  D -0.245  536s
+epoch  130  G 4.272  D -0.284  585s
+epoch  140  G 3.995  D -0.301  634s
+epoch  150  G 4.194  D -0.268  683s
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/usr/local/lib/python3.13/dist-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+ML utility diff (real - synthetic):
+         acc     auc      f1
+lr   3.2450  0.0337  0.1435
+dt   3.2040  0.1587  0.1477
+rf   6.8380  0.1861  0.1882
+mlp  3.6032  0.0894  0.1535
+svm  4.2379  0.1196  0.1553
+mean diff: {'acc': 4.2256, 'auc': 0.1175, 'f1': 0.1576}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.0315, 'avg_jsd': 0.1771, 'diff_corr': 1.5519}
+paper-as-written defs: {'avg_js_divergence': 0.0503, 'avg_abs_pearson_diff': 0.0506}
+done in 770s -> runs/final/gaussian_s1

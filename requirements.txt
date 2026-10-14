@@ -1,0 +1,10 @@
+# versions used for the results in this repo
+torch==2.14.1
+pennylane==0.45.1
+numpy==2.5.3
+pandas==2.3.3
+scikit-learn==1.9.1
+scipy==1.18.1
+dython==0.7.12
+ctgan  # vanilla CTGAN baseline; any recent version (results used 0.12.2.dev0 from sdv-dev/CTGAN main)
+pytest
