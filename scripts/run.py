@@ -25,7 +25,7 @@ import torch  # noqa: E402
 
 from qtabgan.config import Config  # noqa: E402
 from qtabgan.data import Preprocessor, ctabgan_split, load  # noqa: E402
-from qtabgan.evaluate import ml_utility, qtabgan_paper_metrics, stat_sim  # noqa: E402
+from qtabgan.evaluate import ml_utility, paper_guess_utility, qtabgan_paper_metrics, stat_sim  # noqa: E402
 from qtabgan.model import QTabGAN  # noqa: E402
 
 
@@ -36,6 +36,8 @@ def parse():
     ap.add_argument('--tune', action='store_true', help='evaluate on a validation split of train')
     ap.add_argument('--eval', choices=['full', 'quick', 'none'], default='full')
     ap.add_argument('--threads', type=int, default=1)
+    ap.add_argument('--paper-guess', action='store_true',
+                    help='also record evaluate.paper_guess_utility (kNN and LR, unscaled; a guess at the paper\'s eval)')
     for f in dataclasses.fields(Config):
         flag = '--' + f.name.replace('_', '-')
         if isinstance(f.default, bool):
@@ -88,6 +90,9 @@ def main():
         result['ml_utility_mean_diff'] = diff.mean().to_dict()
         result['stat_sim'] = stat_sim(df, fake, spec['categorical'])
         result['paper_metrics'] = qtabgan_paper_metrics(df, fake, spec['categorical'])
+        if a.paper_guess:
+            result['paper_guess'] = {c: paper_guess_utility(df, fake, c) for c in ('knn', 'lr')}
+            print('paper_guess:', {c: round(v['paper_dist'], 4) for c, v in result['paper_guess'].items()})
         print('ML utility diff (real - synthetic):\n', diff.round(4).to_string())
         print('mean diff:', {k: round(v, 4) for k, v in result['ml_utility_mean_diff'].items()})
         print('stat_sim (CTAB-GAN+ defs):', {k: round(v, 4) for k, v in result['stat_sim'].items()})

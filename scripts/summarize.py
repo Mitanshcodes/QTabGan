@@ -67,7 +67,8 @@ def final(root, ref_path=None):
             cells += [f"{ref[k][sec][key]:.{d}f}" for k in ('marginals', 'real_copy')]
         print(f'| {label} | ' + ' | '.join(cells) + ' |')
     # Paired comparisons: each trained-quantum arm vs each control (same seed index), Holm-corrected
-    qarms = [a for a in arms if a in ('quantum', 'quantum_angle', 'best_quantum', 'paper_literal')]
+    qarms = [a for a in arms if a in ('quantum', 'quantum_angle', 'best_quantum', 'paper_literal')
+             or a.startswith('quantum_')]
     controls = [a for a in arms if a not in qarms]
     tests = []
     for qa in qarms:
