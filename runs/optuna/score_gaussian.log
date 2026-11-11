@@ -1,0 +1,13 @@
+[I 2026-11-11 12:30:56,182] A new study created in RDB with name: score_gaussian
+score_gaussian: searching ['mapper_dims', 'disc_dims', 'lr_classical', 'loss', 'batch_size', 'cat_output', 'betas', 'd_steps']
+
+### score_gaussian: all trials COMPLETE 21  PRUNED 19
+budget (first 40 finished): COMPLETE 21, PRUNED at epoch 20 19 (48%)
+
+| trial | value | mapper_dims | disc_dims | lr_classical | loss | batch_size | cat_output | betas | d_steps |
+|---|---|---|---|---|---|---|---|---|---|
+| 14 | 0.2171 | 1024,1024 | 512,512 | 0.0009391778346119252 | wgan_gp | 500 | gumbel | 0.5,0.9 | 5 |
+| 36 | 0.2243 | 512,512 | 256,256 | 0.0005845047501749447 | wgan_gp | 500 | linear | 0.5,0.999 | 5 |
+| 37 | 0.2320 | 1024,1024 | 512,512 | 0.0005456970706912395 | wgan_gp | 500 | gumbel | 0.5,0.9 | 5 |
+| 25 | 0.2322 | 512,512 | 512,512 | 0.00036820433958553375 | wgan_gp | 256 | linear | 0.5,0.999 | 5 |
+| 30 | 0.2376 | 512,512 | 256,256 | 0.0010157098392074727 | wgan_gp | 500 | linear | 0.5,0.9 | 5 |

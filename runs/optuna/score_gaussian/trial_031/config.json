@@ -1,0 +1,56 @@
+{
+ "params": {
+  "mapper_dims": "1024,1024",
+  "disc_dims": "512,512",
+  "lr_classical": 0.001651630787309398,
+  "loss": "wgan_gp",
+  "batch_size": 500,
+  "cat_output": "gumbel",
+  "betas": "0.5,0.9",
+  "d_steps": 2
+ },
+ "config": {
+  "n_qubits": 8,
+  "n_layers": 4,
+  "n_shots": 1024,
+  "init_hadamard": true,
+  "rotations": "ry_rz",
+  "entanglement": "ring",
+  "angle_init": "uniform_0_2pi",
+  "noise_scale": 0.5,
+  "noise_encoding": "none",
+  "prob_scale": "n_outcomes",
+  "gradient": "backprop_straight_through",
+  "backend": "torch",
+  "source": "gaussian",
+  "mapper_dims": [
+   1024,
+   1024
+  ],
+  "disc_dims": [
+   512,
+   512
+  ],
+  "cat_output": "gumbel",
+  "condition_on": "target",
+  "loss": "wgan_gp",
+  "epochs": 60,
+  "batch_size": 500,
+  "lr_classical": 0.001651630787309398,
+  "lr_quantum": 0.01,
+  "betas": [
+   0.5,
+   0.9
+  ],
+  "d_steps": 2,
+  "clip_percentiles": [
+   1,
+   99
+  ],
+  "numeric_range": "zscore_then_minmax_0_pi",
+  "input_noise_var": 1e-05,
+  "categorical_encoding": "one_hot",
+  "seed": 0,
+  "device": "cpu"
+ }
+}

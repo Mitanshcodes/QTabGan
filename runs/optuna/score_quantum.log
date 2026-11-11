@@ -1,0 +1,13 @@
+[I 2026-11-11 10:47:52,956] A new study created in RDB with name: score_quantum
+score_quantum: searching ['mapper_dims', 'disc_dims', 'lr_classical', 'loss', 'batch_size', 'cat_output', 'betas', 'd_steps', 'lr_quantum', 'noise_encoding', 'prob_scale', 'angle_init', 'noise_scale']
+
+### score_quantum: all trials COMPLETE 21  PRUNED 19
+budget (first 40 finished): COMPLETE 21, PRUNED at epoch 20 19 (48%)
+
+| trial | value | mapper_dims | disc_dims | lr_classical | loss | batch_size | cat_output | betas | d_steps | lr_quantum | noise_encoding | prob_scale | angle_init | noise_scale |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 28 | 0.1916 | 512,512 | 1024,1024 | 0.0001174118438487215 | wgan_gp | 128 | linear | 0.5,0.999 | 5 | 0.005501940221224607 | angle | n_outcomes | small_normal | 0.834786911080491 |
+| 4 | 0.2225 | 512,512 | 1024,1024 | 0.00015102010512506347 | wgan_gp | 128 | linear | 0.5,0.999 | 2 | 0.001924717445709993 | angle | n_outcomes | small_normal | 0.8621959987557737 |
+| 29 | 0.2285 | 256,256 | 1024,1024 | 0.001159822849479833 | wgan_gp | 256 | gumbel | 0.5,0.9 | 5 | 0.0002134498673083089 | none | none | uniform_0_2pi | 0.855796867056376 |
+| 38 | 0.2291 | 512,512 | 1024,1024 | 6.576901091291596e-05 | wgan_gp | 128 | linear | 0.5,0.999 | 2 | 0.0026242753825097076 | angle | n_outcomes | small_normal | 1.4553517897047925 |
+| 30 | 0.2475 | 1024,1024 | 256,256 | 0.0015241346863366302 | wgan_gp | 256 | gumbel | 0.5,0.9 | 5 | 0.0006515681152964967 | none | none | small_normal | 1.818575485052334 |
