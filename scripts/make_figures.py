@@ -34,12 +34,13 @@ from matplotlib.patches import Patch  # noqa: E402
 
 import training_length as tl  # noqa: E402
 
-OUT = 'figures'
+OUT = os.environ.get('FIG_OUT', 'figures')
 CONFIRM = os.environ.get('FIG_CONFIRM_ROOT', 'runs/confirm')
 TLROOT = os.environ.get('FIG_TL_ROOT', 'runs/training_length')
 
 # One colour per model, everywhere.
 C = {'quantum': '#7B2CBF', 'gaussian': '#E8822A', 'ctgan': '#8C8C8C', 'literal': '#C9B1E6', 'real': '#222222'}
+TEXT_C = dict(C, literal='#8A63BF')  # same hue, dark enough for text
 LABEL = {'quantum': 'QTabGAN (best searched config)',
          'gaussian': 'Gaussian control (same network, Gaussian noise)',
          'literal': 'QTabGAN, literal paper settings', 'ctgan': 'CTGAN (classical baseline)', 'real': 'Real data'}
@@ -332,7 +333,7 @@ def fig5():
     fig, axes = plt.subplots(2, 3, figsize=(19, 13.5), layout='constrained')
     for ax, k in zip(axes[0], ('real', 'quantum', 'gaussian')):
         im1 = ax.imshow(A[k].to_numpy(), cmap='RdBu_r', vmin=-1, vmax=1)
-        ax.set_title(LABEL[k] if k == 'real' else SHORT[k], color=C[k] if k != 'real' else 'black', fontweight='bold')
+        ax.set_title(LABEL[k] if k == 'real' else SHORT[k], color=TEXT_C[k], fontweight='bold')
     for ax, arm in zip(axes[1, 1:], ('quantum', 'gaussian')):
         im2 = ax.imshow(D[arm].to_numpy(), cmap='Reds', vmin=0, vmax=dmax)
         ax.set_title(f'|{SHORT[arm]} - real|   (Diff. Corr = {fro[arm]:.2f})', color=C[arm], fontweight='bold')
@@ -358,6 +359,151 @@ def fig5():
     headline(fig, title, 'Seed-0 synthetic table of each model (test-split run) vs the full real Adult table; '
              'same association measure as the Diff. Corr metric.')
     save(fig, 'fig5_correlation_heatmaps')
+
+
+# ---------------------------------------------------------------- four-model figures (C, D, E)
+def four_models():
+    """{model: (results, histories, run glob)}. FIG_FOUR=search_final uses the earlier final stage (random-search
+    winners, 2 seeds) for QTabGAN / Gaussian; default = the step-5 best configs."""
+    if os.environ.get('FIG_FOUR') == 'search_final':
+        q, g = 'runs/search_final/best_quantum_s*', 'runs/search_final/best_gaussian_s*'
+    else:
+        names = best()
+        q, g = f'{CONFIRM}/{names["quantum"]}_s*', f'{CONFIRM}/{names["gaussian"]}_s*'
+    out = {}
+    for m, pat in (('quantum', q), ('gaussian', g), ('literal', 'runs/search_final/paper_literal_s*'),
+                   ('ctgan', 'runs/final/ctgan_s*')):
+        dirs = sorted(glob.glob(pat))
+        out[m] = ([json.load(open(f'{d}/result.json')) for d in dirs],
+                  [json.load(open(f'{d}/history.json')) for d in dirs if os.path.exists(f'{d}/history.json')], pat)
+    return out
+
+
+def source_note():
+    return ('Models: random-search winners (runs/search_final), literal paper settings, CTGAN; 2 seeds each.'
+            if os.environ.get('FIG_FOUR') == 'search_final' else
+            'Models: step-5 best configs (5 seeds), literal paper settings and CTGAN (2 seeds each).')
+
+
+CLF = {'lr': 'Logistic\nregression', 'dt': 'Decision\ntree', 'rf': 'Random\nforest', 'mlp': 'MLP', 'svm': 'SVM'}
+
+
+def figC():
+    M = four_models()
+    real = M['quantum'][0][0]['ml_utility_real']  # real-trained scores are identical across runs (same split)
+    fig, axes = plt.subplots(1, 3, figsize=(19, 5.8))
+    rng = np.random.default_rng(1)
+    w = 0.16
+    keys = ['real'] + list(M)
+    for ax, (met, lab) in zip(axes, (('acc', 'Accuracy on real test rows\n(%, higher is better; axis starts at 50)'),
+                                     ('f1', 'F1 score on real test rows (higher is better)'),
+                                     ('auc', 'ROC AUC on real test rows (higher is better)'))):
+        for j, c in enumerate(CLF):
+            for k, m in enumerate(keys):
+                x = j + (k - 2) * w
+                if m == 'real':
+                    ax.bar(x, real[met][c], w, color='#333333')
+                    continue
+                v = np.array([r['ml_utility_fake'][met][c] for r in M[m][0]])
+                ax.bar(x, v.mean(), w, color=C[m])
+                ax.scatter(x + rng.uniform(-w / 4, w / 4, len(v)), v, s=10, color='black', zorder=3, lw=0)
+        ax.set_xticks(range(len(CLF)), list(CLF.values()))
+        ax.set(ylabel=lab, title={'acc': 'Accuracy', 'f1': 'F1 score', 'auc': 'ROC AUC'}[met])
+        ax.grid(axis='x', visible=False)
+        if met == 'auc':
+            ax.axhline(0.5, color='#444444', ls=':', lw=1.3)
+            ax.text(4.45, 0.505, 'chance', ha='right', va='bottom', fontsize=10.5, color='#444444')
+        if met == 'acc':
+            ax.set_ylim(bottom=50)
+    fig.legend(handles=[Patch(color='#333333', label='Trained on real data (target)')] +
+               [Patch(color=C[m], label=f'Trained on synthetic: {LABEL[m]}') for m in M] +
+               [Line2D([], [], color='black', marker='o', ls='', ms=4, label='One seed')],
+               loc='lower center', ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.17))
+    gap = {m: np.mean([r['ml_utility_mean_diff']['f1'] for r in M[m][0]]) for m in M}
+    order = sorted(gap, key=gap.get)
+    headline(fig, f'Classifiers trained on {SHORT[order[0]].splitlines()[0]} data come closest to real-data '
+                  f'performance; {SHORT[order[-1]].replace(chr(10), " ")} data is furthest',
+             'Train on synthetic, test on real: each classifier is trained on a synthetic table and scored on the '
+             'same held-out real rows as the dark bar. ' + source_note())
+    save(fig, 'figC_classifier_utility')
+
+
+def figD():
+    M = {m: v for m, v in four_models().items() if v[1]}
+    fig, axes = plt.subplots(3, len(M), figsize=(6 * len(M), 12), sharex='col', squeeze=False)
+    for j, (m, (rs, hs, _)) in enumerate(M.items()):
+        loss = rs[0]['config']['loss']
+        n = min(len(h) for h in hs)
+        x = np.arange(1, n + 1)
+        lt = 'WGAN-GP' if loss == 'wgan_gp' else 'BCE'
+        for i, (key, lab) in enumerate((('g_loss', f'Generator loss ({lt})'),
+                                        ('d_loss', f'Discriminator loss ({lt})'),
+                                        ('angle_norm', 'Norm of circuit angles (radians)'))):
+            ax = axes[i, j]
+            if key not in hs[0][0]:
+                ax.axis('off')
+                ax.text(0.5, 0.5, 'No circuit\n(Gaussian noise input)', ha='center', va='center',
+                        transform=ax.transAxes, color='#777777')
+                continue
+            band(ax, x, [[e[key] for e in h[:n]] for h in hs], C[m], None)
+            ax.set_ylabel(lab + ('' if key == 'angle_norm' else '\n(no "better" direction)'))
+            if i == 2 or 'angle_norm' not in hs[0][0] and i == 1:
+                ax.set_xlabel('Epoch')
+                ax.xaxis.set_tick_params(labelbottom=True)
+        axes[0, j].set_title(f'{SHORT[m].replace(chr(10), " ")} ({len(hs)} seeds)', color=TEXT_C[m],
+                             fontweight='bold')
+    def spiky(hs):  # mean |epoch-to-epoch change| of D loss: last third vs middle third
+        d = np.abs(np.diff(np.mean([[e['d_loss'] for e in h] for h in hs], 0)))
+        k = len(d) // 3
+        return d[-k:].mean() / (d[k:2 * k].mean() + 1e-9)
+    bad = [SHORT[m].replace(chr(10), ' ') for m, (_, hs, _) in M.items() if spiky(hs) > 2]
+    headline(fig, (f"{' and '.join(bad)}: losses become spiky late in training; the others settle smoothly"
+                   if bad else 'All three GAN variants train without late loss spikes')
+             + ' (CTGAN logs no per-epoch losses)',
+             'Line = mean over seeds, band = min-max. Each column has its own scale: BCE and WGAN-GP losses '
+             'are not comparable, and a GAN loss is not a quality score. ' + source_note())
+    save(fig, 'figD_training_curves_all')
+
+
+def figE():
+    M, ref = four_models(), reference()
+    cols = [(('ml_utility_mean_diff', 'acc'), 'Accuracy gap\n(% points)', 1),
+            (('ml_utility_mean_diff', 'f1'), 'F1 gap', 3), (('ml_utility_mean_diff', 'auc'), 'AUC gap', 3),
+            (('stat_sim', 'avg_jsd'), 'Category-share\nerror (avg JSD)', 3),
+            (('stat_sim', 'avg_wd'), 'Numeric-column\nerror (avg WD)', 3),
+            (('stat_sim', 'diff_corr'), 'Correlation\nerror (Diff. Corr)', 2)]
+    rows = list(M) + ['floor', 'ceiling']
+    val = np.array([[np.mean([get(r, p) for r in M[m][0]]) if m in M else
+                     get(ref['marginals' if m == 'floor' else 'real_copy'], p) for p, _, _ in cols] for m in rows])
+    sd = np.array([[np.std([get(r, p) for r in M[m][0]], ddof=1) if m in M else np.nan for p, _, _ in cols]
+                   for m in rows])
+    # colour: rank among the 4 models per column (green = best, red = worst); reference rows grey
+    rank = np.argsort(np.argsort(val[:4], 0), 0) / 3
+    fig, ax = plt.subplots(figsize=(15, 6.5))
+    rgb = plt.cm.RdYlGn_r(0.15 + 0.7 * rank)
+    img = np.concatenate([rgb, np.ones((2, len(cols), 4)) * [0.93, 0.93, 0.93, 1]])
+    ax.imshow(img, aspect='auto')
+    for i in range(len(rows)):
+        for j, (_, _, d) in enumerate(cols):
+            t = f'{val[i, j]:.{d}f}' + (f'\n+/- {sd[i, j]:.{d}f}' if i < 4 else '')
+            ax.text(j, i, t, ha='center', va='center', fontsize=11.5)
+    ax.set_xticks(range(len(cols)), [c[1] for c in cols])
+    ax.xaxis.tick_top()
+    ax.set_yticks(range(len(rows)), [LABEL[m] for m in M] + [FLOOR_LABEL, CEIL_LABEL])
+    for t, m in zip(ax.get_yticklabels(), rows):
+        t.set_color(TEXT_C.get(m, '#555555'))
+    ax.axhline(3.5, color='white', lw=4)
+    ax.grid(False)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    ax.tick_params(length=0)
+    wins = {m: int((rank[i] == 0).sum()) for i, m in enumerate(M)}
+    top = max(wins, key=wins.get)
+    headline(fig, f'{SHORT[top].splitlines()[0]} is best on {wins[top]} of {len(cols)} metrics; '
+                  f'QTabGAN (best searched) is best on {wins["quantum"]}',
+             'Mean +/- sd over seeds; every metric is an error, lower is better. Colour = rank among the four '
+             'models in that column (green best, red worst). ' + source_note())
+    save(fig, 'figE_scorecard')
 
 
 # ---------------------------------------------------------------- figA
@@ -456,7 +602,8 @@ def figB():
     save(fig, 'figB_screening')
 
 
-FIGS = {'fig1': fig1, 'fig2': fig2, 'fig3': fig3, 'fig4': fig4, 'fig5': fig5, 'figA': figA, 'figB': figB}
+FIGS = {'fig1': fig1, 'fig2': fig2, 'fig3': fig3, 'fig4': fig4, 'fig5': fig5, 'figA': figA, 'figB': figB,
+        'figC': figC, 'figD': figD, 'figE': figE}
 
 if __name__ == '__main__':
     want = sys.argv[1:] or list(FIGS)
