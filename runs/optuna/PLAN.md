@@ -123,4 +123,12 @@ Claims only for what holds across seeds, with spread.
 
 ## Changes after this point
 
-(none yet)
+- **2026-11-11, before any screening result existed: implementation details of step 3/4, no rule
+  changed.** (1) Parallel workers each get their own TPE seed (0-5); identical seeds would draw
+  identical startup configs. (2) Parallel workers can finish a few trials beyond 40; selection uses
+  the first 40 finished (COMPLETE or PRUNED) trials by trial number, identically for both arms.
+  (3) A trial whose objective is NaN/inf is marked FAIL, does not count towards the 40, and failures
+  are reported per arm. (4) Quantum-only settings that have no effect for a given trial (e.g.
+  `noise_scale` when `noise_encoding=none`) are still sampled; this costs TPE some efficiency equally
+  in every quantum trial. (5) `scripts/screen.sh` passes each command to xargs as one argument
+  (macOS `xargs -I` truncates at 255 bytes, which broke the first launch before any run started).

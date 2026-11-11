@@ -134,3 +134,40 @@ def qtabgan_paper_metrics(real_df, fake_df, cat_cols):
     diff = np.abs(r[iu] - f[iu])
     diff = diff[~np.isnan(diff)]
     return {'avg_js_divergence': float(np.mean(jsd_div)), 'avg_abs_pearson_diff': float(np.mean(diff))}
+
+
+# ----------------------------------------------------------------------------- paper_guess
+PAPER_ADULT = {'acc_real': 0.7760, 'acc_syn': 0.7740, 'acc_gap': 0.002, 'f1_gap': 0.008}
+
+
+def paper_guess_utility(real_df, fake_df, classifier='knn', test_ratio=0.2):
+    """A GUESS at the evaluation behind QTabGAN's Adult numbers (real accuracy 0.776, F1 0.762),
+    NOT the CTAB-GAN+ protocol above. ONE untuned classifier on UNSCALED features, weighted F1.
+    scripts/probe_real_accuracy.py found kNN (k=5) and logistic regression, unscaled, closest to the
+    paper's real-data numbers. Real and synthetic rows are split with the same call as ``ml_utility``
+    and both models are scored on the same held-out real rows.
+
+    paper_dist = |acc gap - 0.002| + |weighted-F1 gap - 0.008| (gaps = real - synthetic, fractions),
+    i.e. distance to the paper's best-case Adult result, on gaps so the classifier's own real-data
+    accuracy cancels.
+    """
+    from sklearn.neighbors import KNeighborsClassifier
+    make = {'knn': lambda: KNeighborsClassifier(), 'lr': lambda: LogisticRegression(max_iter=100)}[classifier]
+    real = real_df.to_numpy(dtype=float)
+    d = real.shape[1]
+    Xtr, Xte, ytr, yte = model_selection.train_test_split(
+        real[:, :d - 1], real[:, -1], test_size=test_ratio, stratify=real[:, -1], random_state=42)
+    fake = fake_df[real_df.columns].to_numpy(dtype=float)
+    Xf, yf = fake[:, :d - 1], fake[:, -1]
+    strat = yf if np.min(np.unique(yf, return_counts=True)[1]) >= 2 else None
+    Xf_tr, _, yf_tr, _ = model_selection.train_test_split(Xf, yf, test_size=test_ratio, stratify=strat,
+                                                          random_state=42)
+    out = {}
+    for tag, (X, y) in {'real': (Xtr, ytr), 'syn': (Xf_tr, yf_tr)}.items():
+        pred = make().fit(X, y).predict(Xte) if len(np.unique(y)) > 1 else np.full(len(yte), y[0])
+        out[f'acc_{tag}'] = float(metrics.accuracy_score(yte, pred))
+        out[f'f1w_{tag}'] = float(metrics.f1_score(yte, pred, average='weighted'))
+    out['acc_gap'] = out['acc_real'] - out['acc_syn']
+    out['f1w_gap'] = out['f1w_real'] - out['f1w_syn']
+    out['paper_dist'] = abs(out['acc_gap'] - PAPER_ADULT['acc_gap']) + abs(out['f1w_gap'] - PAPER_ADULT['f1_gap'])
+    return out
