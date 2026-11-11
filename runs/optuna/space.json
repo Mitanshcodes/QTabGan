@@ -1,0 +1,3 @@
+{"selected": ["mapper_dims", "disc_dims", "lr_classical", "loss", "batch_size", "cat_output", "betas", "d_steps",
+              "lr_quantum", "noise_encoding", "prob_scale", "angle_init", "noise_scale"],
+ "note": "From runs/screen/summary.md by the PLAN.md rule (max |d score| > 2 sigma in either arm); noise_encoding, angle_init, noise_scale always searched for quantum. Not selected: n_qubits, n_layers, n_shots, input_noise_var (stay at each arm's base)."}

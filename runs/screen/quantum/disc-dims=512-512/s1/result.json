@@ -1,0 +1,120 @@
+{
+ "config": {
+  "n_qubits": 8,
+  "n_layers": 4,
+  "n_shots": 300,
+  "init_hadamard": true,
+  "rotations": "ry_rz",
+  "entanglement": "ring",
+  "angle_init": "small_normal",
+  "noise_scale": 1.0,
+  "noise_encoding": "angle",
+  "prob_scale": "n_outcomes",
+  "gradient": "backprop_straight_through",
+  "backend": "torch",
+  "source": "quantum",
+  "mapper_dims": [
+   512,
+   512
+  ],
+  "disc_dims": [
+   512,
+   512
+  ],
+  "cat_output": "gumbel",
+  "condition_on": "target",
+  "loss": "bce",
+  "epochs": 40,
+  "batch_size": 256,
+  "lr_classical": 0.0005,
+  "lr_quantum": 0.001,
+  "betas": [
+   0.5,
+   0.9
+  ],
+  "d_steps": 1,
+  "clip_percentiles": [
+   1,
+   99
+  ],
+  "numeric_range": "zscore_then_minmax_0_pi",
+  "input_noise_var": 1e-05,
+  "categorical_encoding": "one_hot",
+  "seed": 1,
+  "device": "cpu"
+ },
+ "params": {
+  "generator_total": 450219,
+  "generator_quantum": 64,
+  "discriminator": 319489
+ },
+ "train_seconds": 631.3758637905121,
+ "tune": true,
+ "n_real_eval_rows": 39073,
+ "n_fake_rows": 39073,
+ "ml_utility_diff": {
+  "acc": {
+   "lr": 3.928342930262332,
+   "dt": 8.176583493282152,
+   "rf": 9.315419065898908
+  },
+  "auc": {
+   "lr": 0.08255892922196784,
+   "dt": 0.17347098851774045,
+   "rf": 0.1973494105953415
+  },
+  "f1": {
+   "lr": 0.20330193253451306,
+   "dt": 0.16861621801982873,
+   "rf": 0.3490675239018915
+  }
+ },
+ "ml_utility_real": {
+  "acc": {
+   "lr": 80.29430582213692,
+   "dt": 80.58861164427384,
+   "rf": 85.3998720409469
+  },
+  "auc": {
+   "lr": 0.813350993734905,
+   "dt": 0.7355565949906225,
+   "rf": 0.9073531885420274
+  },
+  "f1": {
+   "lr": 0.6532271077047196,
+   "dt": 0.7344189400422843,
+   "rf": 0.7868665011251104
+  }
+ },
+ "ml_utility_fake": {
+  "acc": {
+   "lr": 76.36596289187459,
+   "dt": 72.41202815099169,
+   "rf": 76.084452975048
+  },
+  "auc": {
+   "lr": 0.7307920645129372,
+   "dt": 0.5620856064728821,
+   "rf": 0.7100037779466859
+  },
+  "f1": {
+   "lr": 0.4499251751702065,
+   "dt": 0.5658027220224555,
+   "rf": 0.43779897722321887
+  }
+ },
+ "ml_utility_mean_diff": {
+  "acc": 7.140115163147797,
+  "auc": 0.15112644277834994,
+  "f1": 0.24032855815207776
+ },
+ "stat_sim": {
+  "avg_wd": 0.03184320738505838,
+  "avg_jsd": 0.2977244748274381,
+  "diff_corr": 1.8249312422713047
+ },
+ "paper_metrics": {
+  "avg_js_divergence": 0.10381989435731587,
+  "avg_abs_pearson_diff": 0.08128493215909531
+ }
+}

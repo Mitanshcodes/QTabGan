@@ -1,0 +1,15 @@
+real rows for eval: 39073  generator train rows: 31258  held out: 7815
+params: {'generator_total': 450219, 'generator_quantum': 64, 'discriminator': 94209}
+epoch   10  G 1.497  D 1.081  157s
+epoch   20  G 1.585  D 1.006  315s
+epoch   30  G 1.444  D 1.039  476s
+epoch   40  G 1.495  D 0.934  641s
+ML utility diff (real - synthetic):
+         acc     auc      f1
+lr   8.3941  0.2791  0.1304
+dt  13.4357  0.1730  0.1738
+rf  12.6807  0.3443  0.2222
+mean diff: {'acc': 11.5035, 'auc': 0.2655, 'f1': 0.1755}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.0518, 'avg_jsd': 0.1514, 'diff_corr': 3.0998}
+paper-as-written defs: {'avg_js_divergence': 0.0344, 'avg_abs_pearson_diff': 0.1304}
+done in 654s -> runs/screen/quantum/angle-init=uniform-0-2pi/s1
