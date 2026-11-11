@@ -38,6 +38,9 @@ def parse():
     ap.add_argument('--threads', type=int, default=1)
     ap.add_argument('--paper-guess', action='store_true',
                     help='also record evaluate.paper_guess_utility (kNN and LR, unscaled; a guess at the paper\'s eval)')
+    ap.add_argument('--eval-every', type=int, default=0,
+                    help='every N epochs: sample a synthetic table and add F1 gap (lr+dt+rf), avg JSD and '
+                         'Diff. Corr against the evaluation table to that epoch\'s history.json record')
     for f in dataclasses.fields(Config):
         flag = '--' + f.name.replace('_', '-')
         if isinstance(f.default, bool):
@@ -48,6 +51,29 @@ def parse():
         else:
             ap.add_argument(flag, type=type(f.default), default=f.default)
     return ap.parse_args()
+
+
+def make_eval_callback(every, df, cat_cols):
+    """Training-length curve. Uses the existing evaluate.py functions unchanged. Sampling draws from the
+    global torch RNG, so a run with --eval-every is not bit-identical to the same seed without it."""
+    if not every:
+        return None
+
+    def cb(model, epoch):
+        if epoch % every:
+            return
+        t = time.time()
+        fake = model.sample(len(df))
+        ss = stat_sim(df, fake, cat_cols)
+        model.history[-1].update({
+            'eval_f1': float(ml_utility(df, [fake], classifiers=('lr', 'dt', 'rf')).mean()['f1']),
+            'eval_avg_jsd': ss['avg_jsd'], 'eval_diff_corr': ss['diff_corr'],
+            'eval_seconds': time.time() - t})
+        with open(f'{model.out}/history.json', 'w') as fh:  # partial curve survives a crash
+            json.dump(model.history, fh)
+        print(f"eval @ {epoch}: f1 {model.history[-1]['eval_f1']:.4f}  jsd {ss['avg_jsd']:.4f}  "
+              f"diff_corr {ss['diff_corr']:.3f}", flush=True)
+    return cb
 
 
 def main():
@@ -70,10 +96,11 @@ def main():
     X, y = prep.transform(train_df, add_noise=True, rng=np.random.default_rng(cfg.seed))
 
     model = QTabGAN(cfg, prep)
+    model.out = a.out
     params = model.n_params()
     print('params:', params, flush=True)
     t0 = time.time()
-    model.fit(X, y)
+    model.fit(X, y, callback=make_eval_callback(a.eval_every, df, spec['categorical']))
     train_secs = time.time() - t0
 
     fake = model.sample(len(df))
