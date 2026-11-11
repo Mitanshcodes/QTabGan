@@ -17,9 +17,11 @@ what can be recovered exactly, what can't, what we chose instead, and the proble
   against** (Section 4). The most concrete: their real-data accuracy on Adult (77.6%) is impossible
   under the CTAB-GAN+ protocol, where real data scores 80.5–86.2%.
 - **Result (Adult, 2 seeds):** our faithful QTabGAN does not beat a classical control built the same
-  way (same networks, Gaussian noise instead of the circuit), and every quantum variant is worse on
-  correlation structure than a generator that learns no correlations at all. CTGAN beats both.
-  Section 6 has the numbers and caveats.
+  way (same networks, Gaussian noise instead of the circuit). With our first-pass settings every
+  quantum variant was worse on correlation structure than a generator that learns no correlations
+  at all (Section 6). A 20-config random search per arm (Section 7) made the best QTabGAN beat that
+  floor, but the searched classical control still won on every metric (correlation error 0.82 vs
+  2.23). CTGAN beats both.
 - So "reproducing" here means: a faithful implementation, unknowns tuned fairly on a validation
   split, the exact evaluation protocol, and controlled comparisons. It does **not** mean matching
   their decimals, which nobody can do without their code.
@@ -105,7 +107,7 @@ seeing stage 1 (we had first sorted by F1 alone, which picked a run whose catego
 mostly collapsed to one value) and before running stage 2. It ranks over all 13 runs; `s1_gumbel_wgan_gp`
 and `s2_none_shots1024` are the same config and gave identical numbers (determinism check).
 
-| run | avg rank | acc | f1 | auc | avg_jsd | avg_wd | diff_corr | js_div (paper def) | avg|dPearson| (paper def) | train s |
+| run | avg rank | acc | f1 | auc | avg_jsd | avg_wd | diff_corr | js_div (paper def) | avg abs dPearson (paper def) | train s |
 |---|---|---|---|---|---|---|---|---|---|---|
 | s2_gaussian_control | 3.67 | 6.72 | 0.167 | 0.215 | 0.116 | 0.039 | 3.85 | 0.0173 | 0.152 | 85 |
 | s2_angle_shots300 | 4.33 | 4.95 | 0.178 | 0.113 | 0.448 | 0.119 | 2.60 | 0.2368 | 0.082 | 445 |
@@ -145,6 +147,11 @@ layers, 8 qubits, Adam lr 2e-4 (classical) / 1e-2 (angles), betas (0.5, 0.9), ba
    scores below 80.47% on real data (mean 82.63%), and 77.6% is barely above the 76.07% majority
    baseline. So their ML-utility evaluation differs from CTAB-GAN+'s, yet the resulting gaps are
    compared against CTAB-GAN+'s Table III. The paper never names its downstream classifier(s).
+   A probe (`scripts/probe_real_accuracy.py`, output in `runs/probe_real_accuracy.md`) trained 8
+   common classifiers on real Adult data with default settings and 3 scalings. The closest matches
+   to 0.776 / 0.762 are k-nearest-neighbours on unscaled data (0.778 accuracy, 0.758 weighted F1)
+   and logistic regression on unscaled data (0.790, 0.762 weighted F1). This suggests, but does not
+   prove, a single untuned classifier on unscaled features with weighted F1.
 2. **The similarity metrics are defined differently from the numbers they're compared with.**
    CTAB-GAN+'s "Avg JSD" is the JS *distance* and its "Diff. Corr" is the *Frobenius norm* of the
    association-matrix difference. QTabGAN's Sec. 5.2.2 defines JSD as the JS *divergence* (= distance²)
@@ -214,7 +221,7 @@ parameters: the only difference is QTabGAN's 64 circuit angles); `ctgan` = vanil
 | avg_wd | 0.012 +- 0.001 | 0.072 +- 0.019 | 0.036 +- 0.007 | 0.098 +- 0.027 | 0.088 +- 0.039 | 0.001 | 0.000 |
 | diff_corr | 0.67 +- 0.06 | 4.57 +- 1.14 | 1.69 +- 0.19 | 3.99 +- 0.54 | 3.05 +- 0.01 | 2.71 | 0.03 |
 | js_div (paper def) | 0.0133 +- 0.0003 | 0.1799 +- 0.1090 | 0.0437 +- 0.0094 | 0.1709 +- 0.0209 | 0.2093 +- 0.0191 | 0.0001 | 0.0000 |
-| avg|dPearson| (paper def) | 0.036 +- 0.001 | 0.207 +- 0.069 | 0.070 +- 0.028 | 0.179 +- 0.076 | 0.146 +- 0.018 | 0.076 | 0.002 |
+| avg abs dPearson (paper def) | 0.036 +- 0.001 | 0.207 +- 0.069 | 0.070 +- 0.028 | 0.179 +- 0.076 | 0.146 +- 0.018 | 0.076 | 0.002 |
 
 What holds in **both** seeds (with n = 2 we claim nothing else; full per-run numbers and paired
 tests are in `runs/final/summary.md`):
@@ -239,6 +246,57 @@ configurations and the paper's two possible circuit-input readings. That is evid
 14 settings are unstated and 5 ambiguous, and the authors' choices might behave differently. If
 they share code or settings, `scripts/run.py` takes them as flags and the same evaluation applies.
 
-## 7. Questions for the authors
+## 7. Random search over the unknowns (both arms, same budget)
+
+To turn "we guessed the unknowns" into "we searched them", `scripts/search.sh` ran 20 random
+configurations for QTabGAN and 20 for the Gaussian control (60 epochs, validation split, test set
+untouched). Config i shares network sizes, classical learning rate, loss and batch size across both
+arms; the quantum arm also varies layers (2/4/6), shots (300/1024), circuit learning rate
+(1e-3/1e-2/5e-2), circuit input (none/angle), noise range (pi/2 or pi) and starting angles
+(uniform [0, 2pi) or near zero, the latter from our teammates' version). Full table:
+`runs/search/summary.md`.
+
+**Paired result (20 pairs, same shared settings):** the circuit beat Gaussian noise in 3/20 pairs
+on F1 gap, 2/20 on category JSD and 3/20 on correlation error (Wilcoxon p = 0.001, < 0.001, 0.002).
+Two Gaussian configs were sampled twice (identical settings, identical scores), so the Gaussian arm
+effectively had 18 distinct configs: a small handicap that makes the comparison conservative.
+
+**One exception in the search, which did not hold up:** QTabGAN config 12 had the lowest correlation
+error of all 40 runs (1.64 vs the best Gaussian 1.69), while losing on JSD and F1. Retrained on the
+real split for 150 epochs it scored 2.56 and 1.89 (two seeds).
+
+**Final stage** (`scripts/search_final.sh`): the best config of each arm by the same average-rank
+rule, plus the most literal reading of the paper (no circuit input, linear outputs, standard GAN
+loss), retrained on the real CTAB-GAN+ split, 150 epochs, seeds 0 and 1, full evaluation:
+
+| metric | best_gaussian [2] | best_quantum [2] | paper_literal [2] | floor: marginals | ceiling: real copy |
+|---|---|---|---|---|---|
+| acc | 5.34 +- 1.53 | 9.72 +- 2.52 | 7.77 +- 0.96 | 9.34 | 0.18 |
+| f1 | 0.160 +- 0.036 | 0.213 +- 0.011 | 0.237 +- 0.011 | 0.276 | 0.001 |
+| auc | 0.090 +- 0.010 | 0.241 +- 0.051 | 0.231 +- 0.055 | 0.337 | 0.001 |
+| avg_jsd | 0.048 +- 0.005 | 0.376 +- 0.003 | 0.580 +- 0.192 | 0.006 | 0.002 |
+| avg_wd | 0.037 +- 0.025 | 0.036 +- 0.009 | 0.124 +- 0.059 | 0.001 | 0.000 |
+| diff_corr | 0.82 +- 0.09 | 2.23 +- 0.47 | 5.15 +- 0.18 | 2.71 | 0.03 |
+| js_div (paper def) | 0.0040 +- 0.0021 | 0.1756 +- 0.0047 | 0.4277 +- 0.2435 | 0.0001 | 0.0000 |
+| avg abs dPearson (paper def) | 0.036 +- 0.002 | 0.087 +- 0.001 | 0.359 +- 0.056 | 0.076 | 0.002 |
+
+What holds in both seeds:
+- **The searched-best Gaussian control beats the searched-best QTabGAN on every metric** except
+  avg WD (a tie): correlation error 0.88 / 0.75 vs 2.56 / 1.89, category JSD 0.045 / 0.052 vs
+  0.378 / 0.374, F1 gap 0.135 / 0.185 vs 0.206 / 0.221.
+- **Searching helped QTabGAN:** its best config now beats the no-learning floor on correlations
+  (2.56 and 1.89 vs 2.71; the untuned versions in Section 6 did not). It just helped the classical
+  control more (1.69 to 0.82).
+- **The literal paper reading is the worst model tested:** correlation error 5.03 / 5.28, about
+  twice the floor.
+- **The best QTabGAN configs barely use the circuit:** they encode classical noise into it, start
+  the angles near zero and train them with a very small learning rate, so the circuit acts as a
+  fixed transform of classical noise.
+
+**Bottom line of the search:** under a 20-config budget per arm, chosen and judged the same way,
+the quantum circuit does not beat Gaussian noise in the same network. This is still one dataset
+and 2 final seeds.
+
+## 8. Questions for the authors
 
 See `AUTHOR_EMAIL.md`.

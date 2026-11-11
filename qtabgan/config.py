@@ -26,7 +26,18 @@ class Config:
     init_hadamard: bool = _f(True, 'paper', 'Hadamard on every qubit before the variational layers.')
     rotations: str = _f('ry_rz', 'paper', 'One RY and one RZ per qubit per layer.')
     entanglement: str = _f('ring', 'paper', 'CNOT(i, (i+1) mod n) after each layer.')
-    angle_init: str = _f('uniform_0_2pi', 'paper', 'Angles "chosen randomly in [0, 2pi)".')
+    angle_init: str = _f(
+        'uniform_0_2pi',
+        'paper',
+        'Angles "chosen randomly in [0, 2pi)". small_normal = 0.01 * N(0, 1) (teammates\' version) '
+        'for the search.',
+    )
+    noise_scale: float = _f(
+        0.5,
+        'unstated',
+        'With noise_encoding=angle, z_i ~ U[0, noise_scale * pi). 0.5 = U[0, pi/2) (our default); '
+        '1.0 = U[0, pi) (teammates\' version).',
+    )
     noise_encoding: str = _f(
         'none',
         'ambiguous',

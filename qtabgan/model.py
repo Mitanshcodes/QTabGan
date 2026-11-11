@@ -34,7 +34,10 @@ class QuantumSource(nn.Module):
         self.cfg = cfg
         n, L = cfg.n_qubits, cfg.n_layers
         self.n_out = 2**n
-        w = torch.rand(L, n, 2) * 2 * math.pi  # paper: random in [0, 2pi)
+        if cfg.angle_init == 'small_normal':
+            w = 0.01 * torch.randn(L, n, 2)
+        else:
+            w = torch.rand(L, n, 2) * 2 * math.pi  # paper: random in [0, 2pi)
         self.weights = nn.Parameter(w, requires_grad=trainable)
         self.shot_rng = np.random.default_rng(cfg.seed + 12345)
         self.sim = RingCircuit(n) if cfg.backend == 'torch' else None
@@ -61,7 +64,7 @@ class QuantumSource(nn.Module):
     def exact_probs(self, batch_size):
         z = None
         if self.cfg.noise_encoding == 'angle':
-            z = torch.rand(batch_size, self.cfg.n_qubits) * (math.pi / 2)
+            z = torch.rand(batch_size, self.cfg.n_qubits) * (math.pi * self.cfg.noise_scale)
         if self.sim is not None:
             p = self.sim(self.weights, z, batch_size)
         elif z is not None:

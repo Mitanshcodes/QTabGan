@@ -9,7 +9,7 @@ Mean +- sd over seeds (n per arm in brackets). ML-utility rows are real - synthe
 | avg_wd | 0.012 +- 0.001 | 0.072 +- 0.019 | 0.036 +- 0.007 | 0.098 +- 0.027 | 0.088 +- 0.039 | 0.001 | 0.000 |
 | diff_corr | 0.67 +- 0.06 | 4.57 +- 1.14 | 1.69 +- 0.19 | 3.99 +- 0.54 | 3.05 +- 0.01 | 2.71 | 0.03 |
 | js_div (paper def) | 0.0133 +- 0.0003 | 0.1799 +- 0.1090 | 0.0437 +- 0.0094 | 0.1709 +- 0.0209 | 0.2093 +- 0.0191 | 0.0001 | 0.0000 |
-| avg|dPearson| (paper def) | 0.036 +- 0.001 | 0.207 +- 0.069 | 0.070 +- 0.028 | 0.179 +- 0.076 | 0.146 +- 0.018 | 0.076 | 0.002 |
+| avg abs dPearson (paper def) | 0.036 +- 0.001 | 0.207 +- 0.069 | 0.070 +- 0.028 | 0.179 +- 0.076 | 0.146 +- 0.018 | 0.076 | 0.002 |
 
 Paired t-tests (same seed index), Holm-corrected over all comparisons below. Negative delta = quantum arm better. n=2 seeds per arm: a pilot with very low power (df=1, p-values are close to meaningless).
   quantum_angle - ctgan            f1         delta +0.1010   p=0.516  p_holm=1.000

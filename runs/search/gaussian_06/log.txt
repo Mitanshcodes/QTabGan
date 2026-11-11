@@ -1,0 +1,17 @@
+real rows for eval: 39073  generator train rows: 31258  held out: 7815
+params: {'generator_total': 450155, 'generator_quantum': 0, 'discriminator': 319489}
+epoch   10  G 2.586  D 0.543  32s
+epoch   20  G 2.808  D 0.454  76s
+epoch   30  G 3.279  D 0.411  142s
+epoch   40  G 3.218  D 0.364  228s
+epoch   50  G 3.378  D 0.322  323s
+epoch   60  G 3.608  D 0.289  419s
+ML utility diff (real - synthetic):
+         acc     auc      f1
+lr   9.3282  0.2057  0.1481
+dt  11.7722  0.1454  0.1472
+rf   9.1491  0.2103  0.2982
+mean diff: {'acc': 10.0832, 'auc': 0.1871, 'f1': 0.1978}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.041, 'avg_jsd': 0.3682, 'diff_corr': 3.3323}
+paper-as-written defs: {'avg_js_divergence': 0.1698, 'avg_abs_pearson_diff': 0.1257}
+done in 429s -> runs/search/gaussian_06

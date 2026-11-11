@@ -1,0 +1,70 @@
+16:22 finished runs/search/gaussian_00
+16:37 finished runs/search/quantum_01
+16:39 finished runs/search/quantum_00
+16:41 finished runs/search/gaussian_01
+16:46 finished runs/search/gaussian_02
+16:59 finished runs/search/quantum_02
+17:06 finished runs/search/gaussian_03
+17:09 finished runs/search/quantum_03
+17:14 finished runs/search/gaussian_04
+17:21 finished runs/search/quantum_05
+17:22 finished runs/search/quantum_04
+17:25 finished runs/search/gaussian_05
+17:32 finished runs/search/gaussian_06
+17:41 finished runs/search/quantum_07
+17:42 finished runs/search/quantum_06
+17:48 finished runs/search/gaussian_07
+17:55 finished runs/search/gaussian_08
+17:59 finished runs/search/quantum_08
+18:06 finished runs/search/gaussian_09
+18:16 finished runs/search/quantum_10
+18:16 finished runs/search/quantum_09
+18:21 finished runs/search/gaussian_10
+18:24 finished runs/search/gaussian_11
+18:24 finished runs/search/quantum_11
+18:30 finished runs/search/gaussian_12
+18:39 finished runs/search/quantum_12
+18:43 finished runs/search/gaussian_13
+18:44 finished runs/search/quantum_13
+18:47 finished runs/search/gaussian_14
+--- restarted after container restart 18:50
+skip runs/search/gaussian_00
+skip runs/search/quantum_00
+skip runs/search/quantum_01
+skip runs/search/gaussian_01
+skip runs/search/quantum_02
+skip runs/search/gaussian_02
+skip runs/search/quantum_03
+skip runs/search/gaussian_03
+skip runs/search/quantum_04
+skip runs/search/gaussian_04
+skip runs/search/quantum_05
+skip runs/search/gaussian_05
+skip runs/search/quantum_06
+skip runs/search/gaussian_06
+skip runs/search/quantum_07
+skip runs/search/gaussian_07
+skip runs/search/gaussian_08
+skip runs/search/quantum_08
+skip runs/search/quantum_09
+skip runs/search/gaussian_09
+skip runs/search/quantum_10
+skip runs/search/gaussian_10
+skip runs/search/quantum_11
+skip runs/search/gaussian_11
+skip runs/search/quantum_12
+skip runs/search/gaussian_12
+skip runs/search/quantum_13
+skip runs/search/gaussian_13
+skip runs/search/gaussian_14
+18:59 finished runs/search/quantum_15
+19:05 finished runs/search/gaussian_15
+19:05 finished runs/search/quantum_14
+19:09 finished runs/search/gaussian_16
+19:13 finished runs/search/quantum_16
+19:16 finished runs/search/gaussian_17
+19:23 finished runs/search/quantum_17
+19:28 finished runs/search/gaussian_18
+19:32 finished runs/search/quantum_18
+19:37 finished runs/search/quantum_19
+19:38 finished runs/search/gaussian_19

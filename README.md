@@ -68,7 +68,7 @@ parameters: the only difference is QTabGAN's 64 circuit angles); `ctgan` = vanil
 | avg_wd | 0.012 +- 0.001 | 0.072 +- 0.019 | 0.036 +- 0.007 | 0.098 +- 0.027 | 0.088 +- 0.039 | 0.001 | 0.000 |
 | diff_corr | 0.67 +- 0.06 | 4.57 +- 1.14 | 1.69 +- 0.19 | 3.99 +- 0.54 | 3.05 +- 0.01 | 2.71 | 0.03 |
 | js_div (paper def) | 0.0133 +- 0.0003 | 0.1799 +- 0.1090 | 0.0437 +- 0.0094 | 0.1709 +- 0.0209 | 0.2093 +- 0.0191 | 0.0001 | 0.0000 |
-| avg|dPearson| (paper def) | 0.036 +- 0.001 | 0.207 +- 0.069 | 0.070 +- 0.028 | 0.179 +- 0.076 | 0.146 +- 0.018 | 0.076 | 0.002 |
+| avg abs dPearson (paper def) | 0.036 +- 0.001 | 0.207 +- 0.069 | 0.070 +- 0.028 | 0.179 +- 0.076 | 0.146 +- 0.018 | 0.076 | 0.002 |
 
 What holds in **both** seeds (with n = 2 we claim nothing else; full per-run numbers and paired
 tests are in `runs/final/summary.md`):
@@ -92,6 +92,16 @@ tests are in `runs/final/summary.md`):
 configurations and the paper's two possible circuit-input readings. That is evidence, not proof:
 14 settings are unstated and 5 ambiguous, and the authors' choices might behave differently. If
 they share code or settings, `scripts/run.py` takes them as flags and the same evaluation applies.
+
+## Update: random search over the unknowns
+
+A 20-config random search per arm (QTabGAN and the Gaussian control, same budget; `scripts/search.sh`)
+then retraining each arm's winner on the real split (`scripts/search_final.sh`) gives, over 2 seeds:
+correlation error 0.82 (Gaussian) vs 2.23 (QTabGAN) vs 5.15 (literal paper reading); category JSD
+0.048 vs 0.376 vs 0.580. In the 20 matched search pairs the circuit beat Gaussian noise in only
+2–3 per metric. Details: REPRODUCIBILITY.md Section 7, `runs/search/summary.md`,
+`runs/search_final/summary.md`. `scripts/probe_real_accuracy.py` shows which simple classifiers
+reproduce the paper's 77.6% real-data accuracy (unscaled kNN or logistic regression).
 
 ## Relation to the earlier CTGAN fork
 

@@ -1,4 +1,4 @@
-| run | avg rank | acc | f1 | auc | avg_jsd | avg_wd | diff_corr | js_div (paper def) | avg|dPearson| (paper def) | train s |
+| run | avg rank | acc | f1 | auc | avg_jsd | avg_wd | diff_corr | js_div (paper def) | avg abs dPearson (paper def) | train s |
 |---|---|---|---|---|---|---|---|---|---|---|
 | s2_gaussian_control | 3.67 | 6.72 | 0.167 | 0.215 | 0.116 | 0.039 | 3.85 | 0.0173 | 0.152 | 85 |
 | s2_angle_shots300 | 4.33 | 4.95 | 0.178 | 0.113 | 0.448 | 0.119 | 2.60 | 0.2368 | 0.082 | 445 |

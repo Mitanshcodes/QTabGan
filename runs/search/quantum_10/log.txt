@@ -1,0 +1,19 @@
+real rows for eval: 39073  generator train rows: 31258  held out: 7815
+params: {'generator_total': 450187, 'generator_quantum': 32, 'discriminator': 94209}
+epoch   10  G -0.850  D -0.068  71s
+epoch   20  G 0.164  D -0.155  160s
+epoch   30  G 1.195  D -0.024  262s
+epoch   40  G 0.380  D -0.013  362s
+epoch   50  G -0.095  D -0.030  461s
+epoch   60  G -0.228  D -0.028  558s
+/usr/local/lib/python3.13/dist-packages/sklearn/metrics/_classification.py:1879: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+ML utility diff (real - synthetic):
+        acc     auc      f1
+lr  4.2226  0.1333  0.2207
+dt  4.4146  0.2360  0.2993
+rf  9.3154  0.3818  0.3548
+mean diff: {'acc': 5.9842, 'auc': 0.2504, 'f1': 0.2916}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.1514, 'avg_jsd': 0.5091, 'diff_corr': 4.0311}
+paper-as-written defs: {'avg_js_divergence': 0.3367, 'avg_abs_pearson_diff': 0.1607}
+done in 565s -> runs/search/quantum_10

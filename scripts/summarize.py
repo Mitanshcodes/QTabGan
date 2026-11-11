@@ -18,7 +18,7 @@ ROW_KEYS = [('acc', 'ml_utility_mean_diff', 'acc', 2), ('f1', 'ml_utility_mean_d
             ('auc', 'ml_utility_mean_diff', 'auc', 3), ('avg_jsd', 'stat_sim', 'avg_jsd', 3),
             ('avg_wd', 'stat_sim', 'avg_wd', 3), ('diff_corr', 'stat_sim', 'diff_corr', 2),
             ('js_div (paper def)', 'paper_metrics', 'avg_js_divergence', 4),
-            ('avg|dPearson| (paper def)', 'paper_metrics', 'avg_abs_pearson_diff', 3)]
+            ('avg abs dPearson (paper def)', 'paper_metrics', 'avg_abs_pearson_diff', 3)]
 
 
 def _get(r, sec, key):
@@ -67,7 +67,7 @@ def final(root, ref_path=None):
             cells += [f"{ref[k][sec][key]:.{d}f}" for k in ('marginals', 'real_copy')]
         print(f'| {label} | ' + ' | '.join(cells) + ' |')
     # Paired comparisons: each trained-quantum arm vs each control (same seed index), Holm-corrected
-    qarms = [a for a in arms if a in ('quantum', 'quantum_angle')]
+    qarms = [a for a in arms if a in ('quantum', 'quantum_angle', 'best_quantum', 'paper_literal')]
     controls = [a for a in arms if a not in qarms]
     tests = []
     for qa in qarms:
