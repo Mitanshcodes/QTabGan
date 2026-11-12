@@ -1,0 +1,51 @@
+real rows for eval: 48842  generator train rows: 39073  held out: 9769
+params: {'generator_total': 450219, 'generator_quantum': 64, 'discriminator': 1163265}
+epoch   10  G 0.524  D -0.806  456s
+epoch   20  G 0.562  D -0.699  902s
+epoch   30  G 0.559  D -0.591  1434s
+epoch   40  G 0.646  D -0.521  1998s
+epoch   50  G 0.619  D -0.479  2555s
+epoch   60  G 0.614  D -0.453  3032s
+epoch   70  G 0.764  D -0.429  3536s
+epoch   80  G 0.845  D -0.413  3966s
+epoch   90  G 0.860  D -0.406  4392s
+epoch  100  G 0.897  D -0.392  4818s
+epoch  110  G 0.878  D -0.377  5232s
+epoch  120  G 0.864  D -0.372  5631s
+epoch  130  G 0.879  D -0.361  6020s
+epoch  140  G 0.892  D -0.354  6413s
+epoch  150  G 0.867  D -0.349  6802s
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/linear_model/_logistic.py:599: ConvergenceWarning: lbfgs failed to converge after 100 iteration(s) (status=1):
+STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+Increase the number of iterations to improve the convergence (max_iter=100).
+You might also want to scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+Please also refer to the documentation for alternative solver options:
+    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+  n_iter_i = _check_optimize_result(
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/linear_model/_logistic.py:599: ConvergenceWarning: lbfgs failed to converge after 100 iteration(s) (status=1):
+STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+Increase the number of iterations to improve the convergence (max_iter=100).
+You might also want to scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+Please also refer to the documentation for alternative solver options:
+    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+  n_iter_i = _check_optimize_result(
+paper_guess: {'knn': 0.0338, 'lr': 0.008}
+ML utility diff (real - synthetic):
+         acc     auc      f1
+lr   3.2961  0.0191  0.1549
+dt   6.2340  0.0486  0.0631
+rf   5.7938  0.0549  0.0673
+mlp  4.0025  0.0458  0.1190
+svm  4.1048  0.0621  0.1581
+mean diff: {'acc': 4.6863, 'auc': 0.0461, 'f1': 0.1124}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.0125, 'avg_jsd': 0.0268, 'diff_corr': 0.4292}
+paper-as-written defs: {'avg_js_divergence': 0.001, 'avg_abs_pearson_diff': 0.0158}
+done in 6896s -> runs/confirm/quantum_score2_s0

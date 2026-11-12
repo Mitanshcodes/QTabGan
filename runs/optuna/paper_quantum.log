@@ -1,0 +1,13 @@
+[I 2026-11-11 13:18:23,511] A new study created in RDB with name: paper_quantum
+paper_quantum: searching ['mapper_dims', 'disc_dims', 'lr_classical', 'loss', 'batch_size', 'cat_output', 'betas', 'd_steps', 'lr_quantum', 'noise_encoding', 'prob_scale', 'angle_init', 'noise_scale']
+
+### paper_quantum: all trials COMPLETE 20  PRUNED 20
+budget (first 40 finished): COMPLETE 20, PRUNED at epoch 20 20 (50%)
+
+| trial | value | mapper_dims | disc_dims | lr_classical | loss | batch_size | cat_output | betas | d_steps | lr_quantum | noise_encoding | prob_scale | angle_init | noise_scale |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 15 | 0.0043 | 128,128 | 512,512 | 0.0002562367306405438 | wgan_gp | 256 | softmax | 0.5,0.9 | 5 | 0.0002111736250415859 | angle | none | uniform_0_2pi | 1.2847386276357342 |
+| 36 | 0.0078 | 512,512 | 1024,1024 | 0.00037559482726588853 | wgan_gp | 500 | linear | 0.5,0.9 | 5 | 0.00047072417941820816 | angle | none | small_normal | 1.7249045750563547 |
+| 34 | 0.0080 | 128,128 | 512,512 | 0.00020863816561506735 | wgan_gp | 256 | softmax | 0.5,0.9 | 5 | 0.0007974157497186886 | angle | none | small_normal | 1.3298056345372402 |
+| 30 | 0.0085 | 256,256 | 512,512 | 0.00024044474025711432 | wgan_gp | 256 | softmax | 0.5,0.9 | 5 | 0.00018544737318442267 | angle | none | uniform_0_2pi | 1.2838615154451614 |
+| 10 | 0.0112 | 128,128 | 512,512 | 0.00018976601841200072 | wgan_gp | 128 | softmax | 0.5,0.9 | 1 | 0.003484216871993179 | angle | none | uniform_0_2pi | 1.4560657240710997 |

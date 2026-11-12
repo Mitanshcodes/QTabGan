@@ -1,0 +1,61 @@
+{
+ "params": {
+  "mapper_dims": "512,512",
+  "disc_dims": "1024,1024",
+  "lr_classical": 6.215573099120113e-05,
+  "loss": "wgan_gp",
+  "batch_size": 500,
+  "cat_output": "linear",
+  "betas": "0.5,0.9",
+  "d_steps": 5,
+  "lr_quantum": 0.0005730015629106687,
+  "noise_encoding": "angle",
+  "prob_scale": "none",
+  "angle_init": "small_normal",
+  "noise_scale": 1.8869550093550416
+ },
+ "config": {
+  "n_qubits": 8,
+  "n_layers": 4,
+  "n_shots": 300,
+  "init_hadamard": true,
+  "rotations": "ry_rz",
+  "entanglement": "ring",
+  "angle_init": "small_normal",
+  "noise_scale": 1.8869550093550416,
+  "noise_encoding": "angle",
+  "prob_scale": "none",
+  "gradient": "backprop_straight_through",
+  "backend": "torch",
+  "source": "quantum",
+  "mapper_dims": [
+   512,
+   512
+  ],
+  "disc_dims": [
+   1024,
+   1024
+  ],
+  "cat_output": "linear",
+  "condition_on": "target",
+  "loss": "wgan_gp",
+  "epochs": 60,
+  "batch_size": 500,
+  "lr_classical": 6.215573099120113e-05,
+  "lr_quantum": 0.0005730015629106687,
+  "betas": [
+   0.5,
+   0.9
+  ],
+  "d_steps": 5,
+  "clip_percentiles": [
+   1,
+   99
+  ],
+  "numeric_range": "zscore_then_minmax_0_pi",
+  "input_noise_var": 1e-05,
+  "categorical_encoding": "one_hot",
+  "seed": 0,
+  "device": "cpu"
+ }
+}

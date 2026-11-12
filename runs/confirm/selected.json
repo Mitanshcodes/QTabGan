@@ -1,0 +1,119 @@
+[
+ {
+  "name": "quantum_score1",
+  "arm": "quantum",
+  "objective": "score",
+  "trial": 28,
+  "value": 0.1915547851118018,
+  "params": {
+   "mapper_dims": "512,512",
+   "disc_dims": "1024,1024",
+   "lr_classical": 0.0001174118438487215,
+   "loss": "wgan_gp",
+   "batch_size": 128,
+   "cat_output": "linear",
+   "betas": "0.5,0.999",
+   "d_steps": 5,
+   "lr_quantum": 0.005501940221224607,
+   "noise_encoding": "angle",
+   "prob_scale": "n_outcomes",
+   "angle_init": "small_normal",
+   "noise_scale": 0.834786911080491
+  }
+ },
+ {
+  "name": "quantum_score2",
+  "arm": "quantum",
+  "objective": "score",
+  "trial": 4,
+  "value": 0.22254241069313582,
+  "params": {
+   "mapper_dims": "512,512",
+   "disc_dims": "1024,1024",
+   "lr_classical": 0.00015102010512506347,
+   "loss": "wgan_gp",
+   "batch_size": 128,
+   "cat_output": "linear",
+   "betas": "0.5,0.999",
+   "d_steps": 2,
+   "lr_quantum": 0.001924717445709993,
+   "noise_encoding": "angle",
+   "prob_scale": "n_outcomes",
+   "angle_init": "small_normal",
+   "noise_scale": 0.8621959987557737
+  }
+ },
+ {
+  "name": "quantum_paper1",
+  "arm": "quantum",
+  "objective": "paper",
+  "trial": 15,
+  "value": 0.004290964161285929,
+  "params": {
+   "mapper_dims": "128,128",
+   "disc_dims": "512,512",
+   "lr_classical": 0.0002562367306405438,
+   "loss": "wgan_gp",
+   "batch_size": 256,
+   "cat_output": "softmax",
+   "betas": "0.5,0.9",
+   "d_steps": 5,
+   "lr_quantum": 0.0002111736250415859,
+   "noise_encoding": "angle",
+   "prob_scale": "none",
+   "angle_init": "uniform_0_2pi",
+   "noise_scale": 1.2847386276357342
+  }
+ },
+ {
+  "name": "gaussian_score1",
+  "arm": "gaussian",
+  "objective": "score",
+  "trial": 14,
+  "value": 0.21710615108567818,
+  "params": {
+   "mapper_dims": "1024,1024",
+   "disc_dims": "512,512",
+   "lr_classical": 0.0009391778346119252,
+   "loss": "wgan_gp",
+   "batch_size": 500,
+   "cat_output": "gumbel",
+   "betas": "0.5,0.9",
+   "d_steps": 5
+  }
+ },
+ {
+  "name": "gaussian_score2",
+  "arm": "gaussian",
+  "objective": "score",
+  "trial": 36,
+  "value": 0.2243117163241477,
+  "params": {
+   "mapper_dims": "512,512",
+   "disc_dims": "256,256",
+   "lr_classical": 0.0005845047501749447,
+   "loss": "wgan_gp",
+   "batch_size": 500,
+   "cat_output": "linear",
+   "betas": "0.5,0.999",
+   "d_steps": 5
+  }
+ },
+ {
+  "name": "gaussian_paper1",
+  "arm": "gaussian",
+  "objective": "paper",
+  "trial": 11,
+  "value": 0.0022164090695876385,
+  "params": {
+   "mapper_dims": "1024,1024",
+   "disc_dims": "1024,1024",
+   "lr_classical": 7.186667168046715e-05,
+   "loss": "wgan_gp",
+   "batch_size": 256,
+   "cat_output": "softmax",
+   "betas": "0.5,0.999",
+   "d_steps": 5
+  }
+ }
+]

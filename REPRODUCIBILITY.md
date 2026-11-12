@@ -22,6 +22,10 @@ what can be recovered exactly, what can't, what we chose instead, and the proble
   at all (Section 6). A 20-config random search per arm (Section 7) made the best QTabGAN beat that
   floor, but the searched classical control still won on every metric (correlation error 0.82 vs
   2.23). CTGAN beats both.
+- **Update (Section 9, pre-registered Optuna search, 5 test seeds):** with an equal 40-trial
+  search per arm, QTabGAN and the Gaussian control are statistically tied, and both now beat CTGAN
+  on JSD and correlation error. The paper's Adult gaps can be matched under a guessed kNN
+  evaluation, but best by the Gaussian control.
 - So "reproducing" here means: a faithful implementation, unknowns tuned fairly on a validation
   split, the exact evaluation protocol, and controlled comparisons. It does **not** mean matching
   their decimals, which nobody can do without their code.
@@ -300,3 +304,154 @@ and 2 final seeds.
 ## 8. Questions for the authors
 
 See `AUTHOR_EMAIL.md`.
+
+## 9. Systematic search for the unstated settings
+
+Sections 6–7 guessed, then randomly searched, the unknowns. This section does it with a plan
+written before any run (`runs/optuna/PLAN.md`, changes logged there with date and reason) and
+two questions:
+
+- **(A)** Is there any reasonable config that reproduces the paper's Adult numbers (real accuracy
+  0.7760, synthetic 0.7740, gap 0.002, weighted-F1 gap about 0.008)?
+- **(B)** Under an equal-budget search, does the quantum noise source beat the same network fed
+  Gaussian noise?
+
+Rules: tuning and selection use the validation split only (`--tune`). The test split is touched
+only in step 5. The Gaussian control gets the same budget, sampler, pruner and selection rule, and
+every shared setting is searchable in both arms. The CTAB-GAN+ evaluation is unchanged; new
+evaluation modes are separate functions. Every run saves its config and metrics.
+
+### Steps
+
+1. **Screening** (`scripts/screen.sh`, 112 runs, 40 epochs, 2 seeds): one setting changed at a time
+   from the Section 7 winners. No single change improved QTabGAN beyond seed noise. Four improved the
+   Gaussian control (5 discriminator steps, linear categorical output, wider discriminator, wider
+   mapper). Clearly harmful levels (softmax outputs, no circuit input, ...) were dropped from the
+   search space (`runs/optuna/space.json`). Figure: `figures/figB_screening.png`.
+2. **Optuna, quality objective** (`scripts/optuna_search.py`): 40 trials per arm, 60 epochs. TPE
+   sampler; successive-halving pruner identical in both arms (min resource 20 epochs, factor 3).
+   Objective = mean of F1 gap, avg JSD and Diff. Corr, each divided by a fixed scale (lower is
+   better).
+3. **Optuna, paper objective**: same budget and space. The objective is the distance to the paper's
+   gaps under `paper_guess_utility`: one kNN (k=5) on unscaled features, which is the simple
+   classifier that reproduces the paper's real-data accuracy (`runs/probe_real_accuracy.md`).
+4. **Confirmation** (`scripts/confirm.py`): the top 2 trials per arm by quality and the closest
+   trial per arm by paper distance (6 configs). Retrained on the real CTAB-GAN+ split, 150 epochs,
+   5 seeds each, full evaluation on the test split.
+
+### Search (validation split)
+
+| study | completed | pruned | best value | best trial |
+|---|---|---|---|---|
+| quality, QTabGAN | 21 | 19 | 0.192 | 28 |
+| quality, Gaussian | 21 | 19 | 0.217 | 14 |
+| paper, QTabGAN | 20 | 20 | 0.0043 | 15 |
+| paper, Gaussian | 17 | 23 | 0.0022 | 11 |
+
+Pruning hit both quality studies equally. It hit the Gaussian paper study slightly harder (23 vs 20).
+Tables: `runs/optuna/report_score.md`, `runs/optuna/report_paper.md`. Figure:
+`figures/figA_search_progress.png`.
+
+### Confirmation (test split, 150 epochs, 5 seeds, mean ± sd)
+
+From `runs/confirm/summary.md`. ML-utility rows are real minus synthetic over lr/dt/rf/mlp/svm.
+Every row is lower-is-better.
+
+| metric | Q score #1 | Q score #2 | Q paper | G score #1 | G score #2 | G paper | floor | ceiling |
+|---|---|---|---|---|---|---|---|---|
+| acc gap (%) | 3.60 ± 0.81 | 4.32 ± 0.75 | 4.58 ± 1.42 | 4.17 ± 0.61 | 4.25 ± 0.66 | 3.72 ± 0.57 | 9.34 | 0.18 |
+| F1 gap | 0.115 ± 0.023 | 0.102 ± 0.015 | 0.106 ± 0.020 | 0.128 ± 0.011 | 0.123 ± 0.015 | 0.122 ± 0.030 | 0.276 | 0.001 |
+| AUC gap | 0.041 ± 0.009 | 0.044 ± 0.004 | 0.065 ± 0.017 | 0.047 ± 0.004 | 0.056 ± 0.005 | 0.045 ± 0.010 | 0.337 | 0.001 |
+| avg JSD | 0.027 ± 0.002 | 0.028 ± 0.002 | 0.097 ± 0.007 | 0.025 ± 0.002 | 0.034 ± 0.001 | 0.048 ± 0.004 | 0.006 | 0.002 |
+| avg WD | 0.012 ± 0.005 | 0.014 ± 0.005 | 0.023 ± 0.004 | 0.015 ± 0.002 | 0.011 ± 0.002 | 0.021 ± 0.008 | 0.001 | 0.000 |
+| Diff. Corr | 0.40 ± 0.03 | 0.43 ± 0.05 | 1.23 ± 0.19 | 0.44 ± 0.04 | 0.35 ± 0.04 | 0.48 ± 0.03 | 2.71 | 0.03 |
+| plan score | 0.235 ± 0.037 | 0.222 ± 0.021 | 0.389 ± 0.031 | 0.255 ± 0.018 | 0.248 ± 0.020 | 0.276 ± 0.046 | 0.706 | 0.007 |
+| train time (min) | 259 | 142 | 180 | 36 | 13 | 107 | | |
+
+Train times are for 6 runs in parallel on one CPU machine, so read them only relative to each other.
+
+Paper-style evaluation on the same runs (kNN on unscaled features). Our real-data accuracy is
+0.7781; the paper reports 0.7760.
+
+| config | accuracy gap (pp) | weighted-F1 gap | distance to the paper's gaps |
+|---|---|---|---|
+| paper's reported numbers | 0.2 | ~0.008 | 0 |
+| G paper | −0.36 ± 0.38 | 0.0069 ± 0.0029 | 0.0077 ± 0.0053 |
+| G score #1 | 0.01 ± 0.71 | 0.0118 ± 0.0039 | 0.0097 ± 0.0046 |
+| Q score #1 | 0.76 ± 0.26 | 0.0140 ± 0.0023 | 0.0115 ± 0.0047 |
+| G score #2 | 0.89 ± 1.46 | 0.0161 ± 0.0074 | 0.0186 ± 0.0189 |
+| Q score #2 | 1.24 ± 0.86 | 0.0158 ± 0.0066 | 0.0182 ± 0.0148 |
+| Q paper | 2.05 ± 2.05 | 0.0233 ± 0.0113 | 0.0338 ± 0.0318 |
+
+### Answers
+
+**(A) Yes, under a guessed evaluation, but the Gaussian control does it best.** Under the
+paper-style kNN evaluation, several configs land at the paper's numbers. The Gaussian config
+searched for this purpose gives an accuracy gap of −0.36 ± 0.38 pp and an F1 gap of 0.007 ± 0.003
+over 5 test seeds (paper: 0.2 pp and about 0.008). The QTabGAN config searched the same way is the
+furthest of all six, with a large seed-to-seed spread (0.008–0.081). The difference between the
+two paper configs is not significant (paired t-test p = 0.17).
+
+Two things limit this answer:
+- **The evaluation is a guess.** It is the simple classifier that reproduces the paper's real-data
+  accuracy, not a documented protocol.
+- **Small gaps here are cheap.** kNN on unscaled features mostly sees fnlwgt and the capital
+  columns, so it is a weak classifier. Under the CTAB-GAN+ protocol the same paper-matching
+  configs still trail real data by 3.6–4.6 accuracy points.
+
+So matching the paper's decimals says little about data quality, and nothing in it requires the
+quantum circuit.
+
+**(B) No evidence that the quantum noise source helps.** Comparing configs of equal search rank
+(paired by seed, plan score):
+
+| pair | mean difference (Q − G) | QTabGAN wins | p (uncorrected) |
+|---|---|---|---|
+| score #1 vs #1 | −0.021 | 3 of 5 seeds | 0.38 |
+| score #2 vs #2 | −0.026 | 3 of 5 seeds | 0.22 |
+
+On individual metrics, after the plan's Holm correction over all 18 step-5 comparisons, no
+quality-config QTabGAN-vs-Gaussian difference is significant. The only significant results:
+QTabGAN's paper-objective config has worse correlation error than every Gaussian config (Holm
+p ≤ 0.018).
+
+The direction is mixed. QTabGAN tends to have a lower F1 gap; the Gaussian control's best config
+has the lowest correlation error. Correcting over only the 3 headline metrics for the two "best"
+configs (fig3; the pick itself used test results):
+- QTabGAN is better on JSD (0.028 vs 0.034).
+- Gaussian is better on Diff. Corr (0.35 vs 0.43).
+- F1 is a tie.
+
+Meanwhile QTabGAN takes 1.7–11× as long to train as the matching Gaussian config.
+
+### What changed from Sections 6–7
+
+- **The systematic search improved QTabGAN a lot.** Plan score: literal paper reading 1.51,
+  Section 7 winner 0.94, now 0.22. Diff. Corr went from 5.15 to 0.43 and JSD from 0.58 to 0.028.
+- **The searched QTabGAN and Gaussian control now beat CTGAN** (2 seeds) on JSD and correlation
+  error, and match it on F1 gap (`figures/figE_scorecard.png`).
+- **Section 7's large Gaussian advantage was mostly an under-searched quantum arm.** With an equal
+  40-trial budget and pruning, the two arms are statistically tied.
+- **Section 7's remark that the best QTabGAN configs barely use the circuit does not hold here.**
+  The step-5 winners use angle encoding, and the circuit angles keep moving through training
+  (norm about 2 to 5 rad over 150 epochs; `figures/figD_training_curves_all.png`).
+
+### Training length (descriptive, validation split)
+
+Each arm's best step-5 config was retrained for 300 epochs, evaluated every 25 (3 seeds;
+`runs/training_length/`, `figures/fig2_training_length.png`). Past 150 epochs, JSD falls about
+another 18% in both arms; F1 gap and Diff. Corr stay flat. Training longer would not change
+answer B.
+
+### Limits
+
+- **Scope:** one dataset (Adult) and 5 seeds per config.
+- **Simulation only:** a noiseless state-vector simulator with shot sampling; no hardware.
+- **Seed and pairing:** the CTGAN and literal-paper comparisons have 2 seeds. Seed pairing
+  matches seed indices, not identical random streams.
+- **Choices made by us, not the paper:** 40 trials per arm, 60 epochs during the search, and the
+  search space itself, which was narrowed by screening.
+- **Clipping:** the paper's 1st–99th percentile clipping caps synthetic numeric columns (age ≤ 74,
+  hours 8–80). This affects both arms equally.
+
+Figures with captions and caveats: `figures/FIGURES.md`.

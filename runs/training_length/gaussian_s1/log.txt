@@ -1,0 +1,53 @@
+real rows for eval: 39073  generator train rows: 31258  held out: 7815
+params: {'generator_total': 450155, 'generator_quantum': 0, 'discriminator': 94209}
+epoch   10  G 3.251  D -0.965  27s
+epoch   20  G 7.082  D -0.886  55s
+eval @ 25: f1 0.0720  jsd 0.0961  diff_corr 0.720
+epoch   30  G 7.068  D -0.781  91s
+epoch   40  G 6.337  D -0.693  122s
+epoch   50  G 6.274  D -0.645  159s
+eval @ 50: f1 0.1129  jsd 0.0814  diff_corr 0.588
+epoch   60  G 5.957  D -0.590  204s
+epoch   70  G 5.543  D -0.559  241s
+eval @ 75: f1 0.0904  jsd 0.0658  diff_corr 0.418
+epoch   80  G 5.569  D -0.512  284s
+epoch   90  G 5.461  D -0.478  320s
+epoch  100  G 5.504  D -0.451  356s
+eval @ 100: f1 0.1022  jsd 0.0523  diff_corr 0.403
+epoch  110  G 5.404  D -0.427  400s
+epoch  120  G 5.094  D -0.412  436s
+eval @ 125: f1 0.0850  jsd 0.0473  diff_corr 0.388
+epoch  130  G 5.047  D -0.396  480s
+epoch  140  G 4.950  D -0.376  517s
+epoch  150  G 4.880  D -0.365  553s
+eval @ 150: f1 0.0898  jsd 0.0407  diff_corr 0.375
+epoch  160  G 4.891  D -0.355  597s
+epoch  170  G 4.688  D -0.341  634s
+eval @ 175: f1 0.1049  jsd 0.0415  diff_corr 0.333
+epoch  180  G 4.543  D -0.336  677s
+epoch  190  G 4.188  D -0.338  716s
+epoch  200  G 4.396  D -0.325  760s
+eval @ 200: f1 0.1282  jsd 0.0356  diff_corr 0.371
+epoch  210  G 4.419  D -0.311  805s
+epoch  220  G 4.181  D -0.302  840s
+eval @ 225: f1 0.1126  jsd 0.0366  diff_corr 0.380
+epoch  230  G 3.927  D -0.304  885s
+epoch  240  G 4.125  D -0.292  926s
+epoch  250  G 4.086  D -0.289  964s
+eval @ 250: f1 0.1075  jsd 0.0341  diff_corr 0.343
+epoch  260  G 4.199  D -0.283  1008s
+epoch  270  G 4.015  D -0.279  1045s
+eval @ 275: f1 0.0926  jsd 0.0316  diff_corr 0.370
+epoch  280  G 4.015  D -0.281  1089s
+epoch  290  G 4.104  D -0.266  1125s
+epoch  300  G 4.033  D -0.268  1162s
+eval @ 300: f1 0.1308  jsd 0.0304  diff_corr 0.341
+ML utility diff (real - synthetic):
+         acc     auc      f1
+lr   3.0710  0.0166  0.1558
+dt  11.1708  0.1314  0.1357
+rf   4.8113  0.0857  0.0956
+mean diff: {'acc': 6.351, 'auc': 0.0779, 'f1': 0.129}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.0101, 'avg_jsd': 0.0305, 'diff_corr': 0.3354}
+paper-as-written defs: {'avg_js_divergence': 0.0017, 'avg_abs_pearson_diff': 0.0129}
+done in 1176s -> runs/training_length/gaussian_s1

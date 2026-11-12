@@ -132,3 +132,14 @@ Claims only for what holds across seeds, with spread.
   `noise_scale` when `noise_encoding=none`) are still sampled; this costs TPE some efficiency equally
   in every quantum trial. (5) `scripts/screen.sh` passes each command to xargs as one argument
   (macOS `xargs -I` truncates at 255 bytes, which broke the first launch before any run started).
+- **2026-11-11, while step 5 was running (no step-5 result existed yet): added a descriptive
+  training-length experiment, outside the plan.** Rule fixed in `scripts/training_length.py` before
+  any step-5 result: per arm, the step-5 config with the lowest mean plan score over its test-split
+  seeds is retrained on the validation split for 300 epochs (seeds 0-2), evaluated every 25 epochs
+  (`scripts/run.py --eval-every 25`, a new flag that does not change `evaluate.py`). Because the pick
+  uses test results, nothing from it feeds any claim of steps 3-5.
+- **2026-11-12, after step 5: reporting additions, no rule changed.** (1) Besides the plan's
+  Holm correction over all 18 step-5 comparisons (`runs/confirm/summary.md`), the write-up reports
+  rank-matched pairs (score rank 1 vs rank 1, rank 2 vs rank 2, paper vs paper) on the plan score
+  and on `paper_dist`, uncorrected, labelled as such. (2) fig3 corrects over its own 3 metrics; this
+  is stated in the figure and in `figures/FIGURES.md`.

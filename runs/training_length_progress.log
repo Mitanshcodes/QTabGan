@@ -1,0 +1,52 @@
+03:20 pipeline finished; training-length experiment
+{
+ "quantum": {
+  "config": "quantum_score2",
+  "mean_test_score": 0.22236132696305858,
+  "name": "quantum_score2",
+  "arm": "quantum",
+  "objective": "score",
+  "trial": 4,
+  "value": 0.22254241069313582,
+  "params": {
+   "mapper_dims": "512,512",
+   "disc_dims": "1024,1024",
+   "lr_classical": 0.00015102010512506347,
+   "loss": "wgan_gp",
+   "batch_size": 128,
+   "cat_output": "linear",
+   "betas": "0.5,0.999",
+   "d_steps": 2,
+   "lr_quantum": 0.001924717445709993,
+   "noise_encoding": "angle",
+   "prob_scale": "n_outcomes",
+   "angle_init": "small_normal",
+   "noise_scale": 0.8621959987557737
+  }
+ },
+ "gaussian": {
+  "config": "gaussian_score2",
+  "mean_test_score": 0.24794810607989973,
+  "name": "gaussian_score2",
+  "arm": "gaussian",
+  "objective": "score",
+  "trial": 36,
+  "value": 0.2243117163241477,
+  "params": {
+   "mapper_dims": "512,512",
+   "disc_dims": "256,256",
+   "lr_classical": 0.0005845047501749447,
+   "loss": "wgan_gp",
+   "batch_size": 500,
+   "cat_output": "linear",
+   "betas": "0.5,0.999",
+   "d_steps": 5
+  }
+ }
+}03:40 finished runs/training_length/gaussian_s2
+03:40 finished runs/training_length/gaussian_s0
+03:40 finished runs/training_length/gaussian_s1
+05:06 finished runs/training_length/quantum_s2
+05:06 finished runs/training_length/quantum_s1
+05:06 finished runs/training_length/quantum_s0
+05:06 training-length done

@@ -103,6 +103,25 @@ correlation error 0.82 (Gaussian) vs 2.23 (QTabGAN) vs 5.15 (literal paper readi
 `runs/search_final/summary.md`. `scripts/probe_real_accuracy.py` shows which simple classifiers
 reproduce the paper's 77.6% real-data accuracy (unscaled kNN or logistic regression).
 
+## Update: pre-registered Optuna search (REPRODUCIBILITY.md Section 9)
+
+A plan written before any run (`runs/optuna/PLAN.md`) went through screening (112 runs), Optuna
+(40 trials per arm, successive-halving pruning, validation split only) and confirmation (6 configs × 5
+seeds, test split, 150 epochs). `bash scripts/optuna_pipeline.sh` reruns steps 3–5 and resumes after
+interruption.
+
+- **QTabGAN improved a lot with a proper search.** Plan score 1.51 (literal paper) → 0.94 (random
+  search) → 0.22. It now beats CTGAN on category JSD and correlation error.
+- **(B) Quantum vs Gaussian noise: statistically tied.** Same-rank configs differ by −0.021 and −0.026
+  in plan score (Q − G; p = 0.38, 0.22). No metric difference survives Holm correction. QTabGAN takes
+  1.7–11× as long to train.
+- **(A) The paper's Adult numbers can be matched,** under a guessed evaluation (kNN on unscaled
+  features, real accuracy 0.778 vs the paper's 0.776). The best match is the Gaussian control
+  (accuracy gap −0.36 ± 0.38 pp, F1 gap 0.007; paper 0.2 pp, ~0.008), not QTabGAN. Under the
+  CTAB-GAN+ protocol, every model still trails real data by 3.6–4.6 accuracy points.
+
+Figures with captions: `figures/FIGURES.md` (build with `python scripts/make_figures.py`).
+
 ## Relation to the earlier CTGAN fork
 
 The earlier patch spliced a quantum noise source into `sdv-dev/CTGAN`. That tests "CTGAN with a

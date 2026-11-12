@@ -173,7 +173,7 @@ def fig1():
                    f"{' and '.join(drifting)} loss still drifting at epoch {len(hq[0])}") +
              f'; the circuit angles change by {100 * (a1 - a0) / a0:+.0f}% over training',
              'Mean over seeds (line) and min-max across seeds (band). '
-             + ('Both use the same loss, but loss values still are not a quality measure.' if same else
+             + ('Both use the same loss, but loss values are still not a quality measure.' if same else
                 'WGAN-GP and BCE losses are on different scales: compare shapes, not levels.'))
     save(fig, 'fig1_training_curves')
 
@@ -212,15 +212,27 @@ def fig2():
                      (('eval_f1', 'f1'), ('eval_avg_jsd', 'avg_jsd'), ('eval_diff_corr', 'diff_corr'))], 0)
         i150 = x.index(150) if 150 in x else len(x) // 2
         parts.append((arm, x[int(np.argmin(s))], s[-1] - s[i150]))
-    # combined-score change from 150 to the last epoch; |change| < 0.02 (well under seed noise) = no change
-    verdict = {a: 'helps' if d < -0.02 else 'hurts' if d > 0.02 else 'none' for a, _, d in parts}
-    if set(verdict.values()) == {'none'}:
+    # per metric: mean of the last 3 eval points vs the 3 points around epoch 150 (smooths single-point
+    # noise); a change counts only if it is >10% in the same direction for BOTH models
+    moves = {}
+    for (sec, key), lab in METRICS:
+        rel = []
+        for arm in ('quantum', 'gaussian'):
+            x, y = summary[(arm, 'eval_' + key)]
+            i = x.index(150) if 150 in x else len(x) // 2
+            rel.append(np.mean(y[-3:]) / np.mean(y[i - 1:i + 2]) - 1)
+        moves[lab.split(' (')[0]] = ('lower' if max(rel) < -0.10 else 'higher' if min(rel) > 0.10 else 'flat')
+    down = [m for m, v in moves.items() if v == 'lower']
+    up = [m for m, v in moves.items() if v == 'higher']
+    flat = [m for m, v in moves.items() if v == 'flat']
+    j = lambda xs: ' and '.join(x[0].lower() + x[1:] if k else x for k, x in enumerate(xs))
+    if not down and not up:
         title = 'Training past 150 epochs neither helps nor hurts either model'
     else:
-        title = '; '.join({'helps': f'Training past 150 epochs helps {SHORT[a]}',
-                           'hurts': f'training past 150 epochs makes {SHORT[a]} worse',
-                           'none': f'{SHORT[a]} does not change'}[v] for a, v in verdict.items())
-        title = title[0].upper() + title[1:]
+        bits = ([f'keeps lowering {j(down).lower()}'] if down else []) + \
+               ([f'raises {j(up).lower()}'] if up else [])
+        title = 'Training past 150 epochs ' + ' but '.join(bits) + \
+                (f'; {j(flat)} stay{"s" if len(flat) == 1 else ""} flat' if flat else '')
     headline(fig, title, 'Validation split, evaluated every 25 epochs. Line = mean over seeds, band = min-max. '
              'Mean combined score is lowest at epoch ' +
              ', '.join(f'{e} ({SHORT[a]})' for a, e, _ in parts) + '.')
@@ -238,23 +250,29 @@ def fig3():
     }
     fig, axes = plt.subplots(1, 3, figsize=(17, 5.6))
     rng = np.random.default_rng(0)
-    wins = 0
+    from scipy import stats
+    tests = []  # (metric name, mean Q - G, paired p) for the two 5-seed arms (same seed index)
     for ax, (path, lab) in zip(axes, METRICS):
-        for i, (m, rs) in enumerate(models.items()):
-            v = np.array([get(r, path) for r in rs])
-            ax.bar(i, v.mean(), color=C[m], width=0.7, edgecolor='none')
-            ax.scatter(i + rng.uniform(-0.15, 0.15, len(v)), v, s=22, color='black', zorder=3, lw=0)
-        q = np.mean([get(r, path) for r in models['quantum']])
-        g = np.mean([get(r, path) for r in models['gaussian']])
-        wins += g < q
-        ax.axhline(get(ref['marginals'], path), color='#444444', ls='--', lw=1.4)
-        ax.axhline(get(ref['real_copy'], path), color='#444444', ls=':', lw=1.6)
         fl, ce = get(ref['marginals'], path), get(ref['real_copy'], path)
-        top = ax.get_ylim()[1]
-        if fl < 0.03 * top:
-            ax.set_ylim(top=top * 1.2)
-            top *= 1.2
-            ax.text(len(models) - 0.45, 0.99 * top, f'Floor ({fl:.3f}) and ceiling ({ce:.3f})\nare both near 0 here',
+        vals = {m: np.array([get(r, path) for r in rs]) for m, rs in models.items()}
+        # y range from everything except the literal-paper arm, so the searched models stay readable;
+        # a literal bar that goes past it is cut and labelled with its value
+        top = 1.25 * max(fl, *(v.max() for m, v in vals.items() if m != 'literal'))
+        for i, (m, v) in enumerate(vals.items()):
+            cut = v.mean() > top
+            ax.bar(i, min(v.mean(), top * 0.97), color=C[m], width=0.7, edgecolor='none')
+            inside = v[v <= top]
+            ax.scatter(i + rng.uniform(-0.15, 0.15, len(inside)), inside, s=22, color='black', zorder=3, lw=0)
+            if cut:
+                ax.text(i, top * 0.94, f'cut off:\nmean {v.mean():.2f}\n(seeds {", ".join(f"{x:.2f}" for x in v)})',
+                        ha='center', va='top', fontsize=10.5, color='black')
+        ax.set_ylim(0, top)
+        q, g = vals['quantum'], vals['gaussian']
+        tests.append((lab.split(' (')[0], q.mean() - g.mean(), stats.ttest_rel(q, g).pvalue))
+        ax.axhline(fl, color='#444444', ls='--', lw=1.4)
+        ax.axhline(ce, color='#444444', ls=':', lw=1.6)
+        if fl < 0.02 * top:
+            ax.text(len(models) - 0.45, 0.80 * top, f'Floor ({fl:.3f}) and ceiling ({ce:.3f})\nare both near 0 here',
                     ha='right', va='top', fontsize=10.5, color='#444444')
         ax.set_xticks(range(len(models)), [f'{SHORT[m]}\n(n={len(rs)})' for m, rs in models.items()])
         ax.set(ylabel=lab, title=lab.split(' (')[0])
@@ -264,11 +282,22 @@ def fig3():
         Line2D([], [], color='#444444', ls='--', label=FLOOR_LABEL),
         Line2D([], [], color='#444444', ls=':', label=CEIL_LABEL)]
     fig.legend(handles=handles, loc='lower center', ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.19))
-    title = {3: 'Gaussian noise beats the quantum circuit on all three metrics',
-             0: 'The quantum circuit beats Gaussian noise on all three metrics'}.get(
-        wins, f'Gaussian noise beats the quantum circuit on {wins} of 3 metrics')
+    # Holm correction over the 3 metrics; "better" only if the corrected p < 0.05
+    order = np.argsort([t[2] for t in tests]); adj, run = [0.0] * 3, 0.0
+    for k, i in enumerate(order):
+        run = max(run, min(1.0, (3 - k) * tests[i][2])); adj[i] = run
+    qb = [t[0].lower().replace('ml-', 'ML-') for t, pa in zip(tests, adj) if pa < 0.05 and t[1] < 0]
+    gb = [t[0].lower().replace('ml-', 'ML-') for t, pa in zip(tests, adj) if pa < 0.05 and t[1] > 0]
+    if not qb and not gb:
+        title = 'QTabGAN and its Gaussian-noise control are statistically tied on all three metrics'
+    else:
+        title = '; '.join(([f'QTabGAN is better on {" and ".join(qb)}'] if qb else []) +
+                          ([f'Gaussian noise is better on {" and ".join(gb)}'] if gb else [])) + \
+                ''.join(f'; no difference in {t[0].lower().replace("ml-", "ML-")}' for t, pa in zip(tests, adj) if pa >= 0.05)
+    ptxt = ', '.join(f'{t[0].split()[0]} p={pa:.2f}' for t, pa in zip(tests, adj))
     headline(fig, title, 'Test split, 150 epochs, full evaluation. Bar = mean over seeds, dot = one seed '
-             '(n = seeds). The literal-paper and CTGAN runs come from earlier stages with 2 seeds.')
+             '(n = seeds). Literal-paper and CTGAN runs are from earlier stages (2 seeds).\n'
+             f'QTabGAN vs Gaussian: paired t-test over 5 seeds, Holm-corrected over the 3 metrics ({ptxt}).')
     save(fig, 'fig3_final_comparison')
 
 
@@ -281,7 +310,7 @@ def fig4():
     df, spec, fakes, _ = real_and_fakes()
     tabs = {'real': df, **fakes}
     fig, axs = plt.subplots(2, 2, figsize=(17, 13), gridspec_kw={'height_ratios': [1, 1.9]})
-    score = {'quantum': 0, 'gaussian': 0}
+    score = {}  # column -> {arm: distance}
     for j, (col, lo, hi, w, unit) in enumerate([('age', 17, 90, 2, 'years'), ('hours-per-week', 1, 99, 3, 'hours')]):
         ax = axs[0, j]
         bins = np.arange(lo, hi + w, w)
@@ -291,9 +320,9 @@ def fig4():
         for arm in fakes:
             ax.step(bins[:-1], h[arm] * 100, where='post', color=C[arm], lw=2, label=SHORT[arm])
             d[arm] = tvd(h['real'], h[arm])
-        score['quantum' if d['quantum'] < d['gaussian'] else 'gaussian'] += 1
+        score[col] = d
         ax.set(xlabel=f'{col} ({unit}; values outside {lo}-{hi} clipped)', ylabel=f'Share of rows (%) per {w}-{unit[:-1]} bin',
-               title=f"{col}: distance from real = {d['quantum']:.2f} QTabGAN, {d['gaussian']:.2f} Gaussian")
+               title=f"{col}: distance from real = {d['quantum']:.3f} QTabGAN, {d['gaussian']:.3f} Gaussian")
         ax.legend(frameon=False, loc='upper right')
     for j, col in enumerate(['education', 'occupation']):
         ax = axs[1, j]
@@ -305,18 +334,26 @@ def fig4():
             ax.barh(y + off, share[k][order] * 100, height=0.27, color='#BBBBBB' if k == 'real' else C[k],
                     label=LABEL['real'] if k == 'real' else SHORT[k])
         d = {arm: tvd(share['real'], share[arm]) for arm in fakes}
-        score['quantum' if d['quantum'] < d['gaussian'] else 'gaussian'] += 1
+        score[col] = d
         ax.set_yticks(y, [CODES[col][c] for c in np.array(cats)[order]])
-        ax.set(xlabel='Share of rows (%)', title=f"{col}: distance from real = {d['quantum']:.2f} QTabGAN, "
-                                                   f"{d['gaussian']:.2f} Gaussian")
+        ax.set(xlabel='Share of rows (%)', title=f"{col}: distance from real = {d['quantum']:.3f} QTabGAN, "
+                                                   f"{d['gaussian']:.3f} Gaussian")
         ax.grid(axis='y', visible=False)
         ax.legend(frameon=False, loc='lower right')
-    g = score['gaussian']
-    title = (f'The Gaussian control matches the real distributions more closely than QTabGAN ({g} of 4 columns)'
-             if g >= 3 else f'QTabGAN matches the real distributions more closely ({4 - g} of 4 columns)'
-             if g <= 1 else 'QTabGAN and the Gaussian control each match 2 of 4 columns better')
+    # single seed: call a column a tie unless the two distances differ by more than 0.02
+    worst = max(score, key=lambda c: np.mean(list(score[c].values())))
+    gap = {c: v['quantum'] - v['gaussian'] for c, v in score.items()}
+    if all(abs(x) <= 0.02 for x in gap.values()):
+        title = (f'Both models match these columns about equally well; both are furthest off on {worst} '
+                 f'(distance {np.mean(list(score[worst].values())):.2f})')
+    else:
+        qb = [c for c, x in gap.items() if x < -0.02]; gb = [c for c, x in gap.items() if x > 0.02]
+        title = '; '.join(([f'QTabGAN is closer on {" and ".join(qb)}'] if qb else []) +
+                          ([f'Gaussian control is closer on {" and ".join(gb)}'] if gb else [])) + \
+                f'; both are furthest off on {worst}'
     headline(fig, title, 'One synthetic table per model (seed 0, test-split run), same size as the real table. '
-             '"Distance" = total variation distance between the two distributions (0 = identical, 1 = disjoint).')
+             '"Distance" = total variation distance between the two distributions\n'
+             '(0 = identical, 1 = disjoint). Differences of 0.02 or less are treated as ties (single seed).')
     save(fig, 'fig4_real_vs_synthetic')
 
 
@@ -412,7 +449,7 @@ def figC():
         ax.grid(axis='x', visible=False)
         if met == 'auc':
             ax.axhline(0.5, color='#444444', ls=':', lw=1.3)
-            ax.text(4.45, 0.505, 'chance', ha='right', va='bottom', fontsize=10.5, color='#444444')
+            ax.text(-0.45, 0.505, 'chance', ha='left', va='bottom', fontsize=10.5, color='#444444')
         if met == 'acc':
             ax.set_ylim(bottom=50)
     fig.legend(handles=[Patch(color='#333333', label='Trained on real data (target)')] +
@@ -421,8 +458,12 @@ def figC():
                loc='lower center', ncol=3, frameon=False, bbox_to_anchor=(0.5, -0.17))
     gap = {m: np.mean([r['ml_utility_mean_diff']['f1'] for r in M[m][0]]) for m in M}
     order = sorted(gap, key=gap.get)
-    headline(fig, f'Classifiers trained on {SHORT[order[0]].splitlines()[0]} data come closest to real-data '
-                  f'performance; {SHORT[order[-1]].replace(chr(10), " ")} data is furthest',
+    nm = lambda m: SHORT[m].replace(chr(10), ' ')
+    tied = [m for m in order if gap[m] - gap[order[0]] < 0.01]  # mean F1 gaps within 0.01 = a tie
+    lead = (f'{" and ".join(nm(m) for m in tied)} data come equally close to real-data performance '
+            f'(mean F1 gap {gap[order[0]]:.2f})' if len(tied) > 1 else
+            f'Classifiers trained on {nm(order[0])} data come closest to real-data performance')
+    headline(fig, f'{lead}; {nm(order[-1])} data is furthest',
              'Train on synthetic, test on real: each classifier is trained on a synthetic table and scored on the '
              'same held-out real rows as the dark bar. ' + source_note())
     save(fig, 'figC_classifier_utility')
