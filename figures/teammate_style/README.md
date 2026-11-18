@@ -15,8 +15,12 @@ The question throughout: **does the quantum circuit help, compared with ordinary
   set (9,769 rows the generators never saw).
 - **The models:** both GANs use the settings our Optuna search picked (fig8). They were trained for 150 epochs with
   5 random seeds each.
-- **Seed counts:** CTGAN and the two older QTabGAN versions are being rerun to 5 seeds. Until those finish, a "1
-  seed" label marks numbers that come from one run.
+- **Seed counts:** every model on the test set has 5 seeds. The training-diagnostic runs (fig1, fig1b) have 3 seeds
+  each, on the validation split.
+- **Reproducibility note:** CTGAN, the literal-paper and the first-pass QTabGAN were rerun here to keep their
+  synthetic tables. Seeds 0–1 do not reproduce the earlier saved runs digit for digit: the numbers drift by ~0.3%
+  from the first epoch, under the same code and settings. The averages and spreads agree, so results reproduce
+  statistically. All numbers in this folder come from the new runs.
 
 Rebuild everything with `python scripts/make_teammate_figures.py` (the runs come from
 `bash scripts/teammate_style.sh`).
@@ -28,27 +32,42 @@ The question, how the model works (diagram), the two main result figures, the co
 The dark banner gives the headline: with equal tuning, QTabGAN and the Gaussian control reach the same test
 macro F1 (0.756 vs 0.756).
 
-### fig1_training_300epochs.png: what happens during training
-Six panels, each with one line per model. The line is the average over 3 seeds; the shaded band shows the best and
-worst seed.
-- **Top left, losses:** the generator and discriminator losses. A GAN's loss only shows that training is stable; it
-  is not a quality score, so neither "up" nor "down" means better.
-- **Top middle, circuit angles:** how far QTabGAN's 64 circuit parameters move. They keep moving through all 300
-  epochs, so the circuit is really being trained.
-- **Top right, cost:** cumulative training time. QTabGAN is about 5× slower.
-- **Bottom row, quality over time:** the three quality errors. For all three, lower is better, and the dashed line
-  is a "generator" that learns nothing.
-  - **Bottom left:** utility gap.
-  - **Bottom middle:** how well category shares match.
-  - **Bottom right:** how well the relationships between columns match.
+### fig1_training_diagnostics.png: what happens during training (as on the teammate's page)
+Six panels, one line per model, average over 3 seeds; the shaded band shows the best and worst seed. Validation
+split, checked every 10 epochs.
+- **Top left, losses:** generator (solid) and discriminator (dashed). A GAN's loss only shows that training is
+  stable; it is not a quality score, so neither "up" nor "down" means better.
+- **Top middle, gradient reaching the circuit:** how strongly each training step pushes QTabGAN's 64 circuit angles.
+  It grows steadily, so the circuit keeps learning and never stalls.
+- **Top right, validation utility:** a forest trained on that epoch's synthetic data, scored on held-out real rows.
+  Solid = accuracy, dashed = macro F1, dotted = AUROC; the grey dashed line is the 76% you get by always guessing
+  ≤50K.
+- **Bottom left, Brier score:** how far the forest's predicted probabilities are from the truth (lower is better).
+- **Bottom middle, feature-mean error:** how far the synthetic column averages are from the real ones, in standard
+  deviations (lower is better).
+- **Bottom right, diversity:**
+  - Solid = within-class spread of the numeric columns compared with real data.
+  - Dashed = share of real categories that appear.
+  - 1 = like real data.
 
-**What it shows:** most of the improvement happens in the first ~100 epochs. QTabGAN ends with better category
-shares, and the Gaussian control with better column relationships.
+**What it shows:** both models improve quickly and then level off. QTabGAN is slightly ahead on validation macro F1
+over the last 50 epochs (0.76 vs 0.74), but on the test set (fig4) they are tied.
 
-**Note:** these runs use the validation split, not the test set.
+### fig1b_validation_scores.png: the four scores per epoch
+Accuracy, macro F1, AUROC and average precision over training, one panel per model, as in the teammate's bottom
+plot.
 
-*Coming when the runs finish:* a version with the circuit's gradient size, accuracy / F1 / AUROC / AP per epoch,
-Brier score and diversity checks, logged every 10 epochs.
+**What it shows:** scores rise over the first ~50 epochs, then level off. The Gaussian control has one unstable
+stretch around epoch 120 that it recovers from.
+
+### fig1_training_300epochs.png: longer training
+The same kind of curves from earlier 300-epoch runs, with the circuit-angle size, training time and the three
+quality errors (lower is better; dashed line = a generator that learns nothing).
+
+**What it shows:**
+- **Most improvement happens in the first ~100 epochs.**
+- **QTabGAN ends with better category shares; the Gaussian control with better column relationships.**
+- **The Gaussian control trains about 5× faster.**
 
 ### fig2_roc_pr.png: ROC and precision-recall curves
 A random forest is trained on each model's synthetic data, and one on the real training rows. Each is then asked to
@@ -90,7 +109,8 @@ individual seeds.
 **What it shows:**
 - **Search matters more than the circuit.** The settings taken literally from the paper, and our first attempt, are
   far worse.
-- **The two searched models are tied:** QTabGAN 0.756 vs Gaussian 0.756 F1.
+- **The searched models and CTGAN are tied:** QTabGAN 0.756, Gaussian 0.756, CTGAN 0.759 F1.
+- **The literal paper settings reach 0.572, and our first attempt 0.534,** with a wide spread across seeds.
 
 ### fig5_results_table.png / results_table.md: the numbers
 Accuracy, macro F1, AUROC, average precision and recall of >50K for each data source. The table also has the

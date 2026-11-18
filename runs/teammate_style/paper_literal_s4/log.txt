@@ -1,0 +1,32 @@
+real rows for eval: 48842  generator train rows: 39073  held out: 9769
+params: {'generator_total': 159659, 'generator_quantum': 64, 'discriminator': 94209}
+epoch   10  G 0.709  D 1.390  73s
+epoch   20  G 0.709  D 1.393  144s
+epoch   30  G 0.691  D 1.390  212s
+epoch   40  G 0.722  D 1.385  278s
+epoch   50  G 0.723  D 1.378  344s
+epoch   60  G 0.695  D 1.386  409s
+epoch   70  G 0.786  D 1.379  474s
+epoch   80  G 0.761  D 1.367  539s
+epoch   90  G 0.715  D 1.388  602s
+epoch  100  G 0.774  D 1.371  669s
+epoch  110  G 0.756  D 1.388  728s
+epoch  120  G 0.781  D 1.382  782s
+epoch  130  G 0.787  D 1.340  834s
+epoch  140  G 0.781  D 1.314  883s
+epoch  150  G 0.823  D 1.327  932s
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/metrics/_classification.py:1879: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+ML utility diff (real - synthetic):
+         acc     auc      f1
+lr   3.8284  0.0707  0.1958
+dt   3.1835  0.2041  0.2279
+rf   9.4175  0.3443  0.3324
+mlp  7.0017  0.2673  0.3012
+svm  5.4253  0.3045  0.2274
+mean diff: {'acc': 5.7713, 'auc': 0.2382, 'f1': 0.2569}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.0635, 'avg_jsd': 0.4559, 'diff_corr': 4.9639}
+paper-as-written defs: {'avg_js_divergence': 0.2664, 'avg_abs_pearson_diff': 0.3116}
+done in 1006s -> runs/teammate_style/paper_literal_s4

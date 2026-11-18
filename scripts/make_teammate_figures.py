@@ -219,11 +219,10 @@ def fig1():
             band(a, x, ys, C[arm], ls=ls, marker='o')
     maj = np.nanmean(series(H['quantum'], 'eval_majority_accuracy', True)[1])
     a.axhline(maj, color='#777', ls=(0, (6, 3)), lw=1.4)
-    a.text(x[-1], maj + 0.006, f'majority-class accuracy ({maj:.2f})', ha='right', va='bottom', fontsize=10.5,
-           color='#555')
     a.set(title='Validation utility (forest trained on synthetic data)', xlabel='Epoch',
           ylabel='Score on held-out real rows (higher is better)')
-    a.legend(handles=[Line2D([], [], color='#555', ls=ls, label=lab) for ls, lab in styles.values()],
+    a.legend(handles=[Line2D([], [], color='#555', ls=ls, label=lab) for ls, lab in styles.values()] +
+             [Line2D([], [], color='#777', ls=(0, (6, 3)), label=f'Majority-class accuracy ({maj:.2f})')],
              loc='lower right', frameon=False)
     # (d) Brier
     a = ax[1, 0]
@@ -255,11 +254,11 @@ def fig1():
     fig.legend(handles=[Line2D([], [], color=C[a_], lw=3, label=f'{LABEL[a_]} ({ns[a_]} seeds)') for a_ in H],
                loc='lower center', ncol=2, frameon=False, bbox_to_anchor=(0.5, -0.04))
     # finding
-    fin = {arm: {k: np.nanmean(series(H[arm], f'eval_{k}', True)[1], 0)[-1] for k in
+    fin = {arm: {k: np.nanmean(np.nanmean(series(H[arm], f'eval_{k}', True)[1], 0)[-5:]) for k in
                  ('macro_f1', 'auroc', 'std_ratio')} for arm in H}
     lead = 'QTabGAN' if fin['quantum']['macro_f1'] > fin['gaussian']['macro_f1'] else 'The Gaussian control'
-    title = (f'Both models learn steadily and the circuit keeps receiving gradient; final validation macro F1 '
-             f'{fin["quantum"]["macro_f1"]:.2f} (QTabGAN) vs {fin["gaussian"]["macro_f1"]:.2f} (Gaussian)')
+    title = (f'Both models learn steadily and the gradient reaching the circuit keeps growing; validation macro F1 over '
+             f'the last 50 epochs {fin["quantum"]["macro_f1"]:.2f} (QTabGAN) vs {fin["gaussian"]["macro_f1"]:.2f} (Gaussian)')
     headline(fig, title, 'Validation split, 150 epochs, evaluated every 10 epochs. Line = mean over seeds, '
              'band = min-max. Utility panels: random forest (100 trees) trained on 39k synthetic rows, '
              'scored on 7,815 held-out real rows; positive class = income >50K.')
@@ -330,7 +329,7 @@ def fig1b():
         for key, (lab, col, mk) in met.items():
             x, ys = series(H[arm], key, True)
             band(a, x, ys, col, label=lab, marker=mk)
-            finals[(arm, key)] = np.nanmean(ys, 0)[-1]
+            finals[(arm, key)] = np.nanmean(np.nanmean(ys, 0)[-5:])
         maj = np.nanmean(series(H[arm], 'eval_majority_accuracy', True)[1])
         a.axhline(maj, color='#777', ls=(0, (6, 3)), lw=1.4, label=f'Majority-class accuracy ({maj:.2f})')
         a.set(title=f'{LABEL[arm]} ({len(H[arm])} seeds)', xlabel='Epoch', ylim=(0, 1))
@@ -338,7 +337,7 @@ def fig1b():
     axes[0].set_ylabel('Validation score (higher is better)')
     axes[1].legend(loc='lower right', frameon=False)
     q, g = finals[('quantum', 'eval_ap')], finals[('gaussian', 'eval_ap')]
-    headline(fig, f'Validation scores rise over the first ~50 epochs, then level off; final average precision '
+    headline(fig, f'Validation scores rise over the first ~50 epochs, then level off; average precision over the last 50 epochs '
                   f'{q:.2f} (QTabGAN) vs {g:.2f} (Gaussian)',
              'Random forest (100 trees) trained on each epoch\'s synthetic table, scored on held-out real rows '
              '(validation split). Line = mean over seeds, band = min-max. Chance AP = 0.24 (share of >50K).')
@@ -450,8 +449,9 @@ def fig4():
     for a in (a1, a2):
         a.grid(axis='y', visible=False)
     f = {m: np.mean([r['metrics']['macro_f1'] for r in E[m]]) for m in order}
-    headline(fig, f'Searched QTabGAN ({f["quantum"]:.3f}) and the Gaussian control ({f["gaussian"]:.3f}) are tied '
-                  f'on macro F1; both far above the literal paper settings ({f.get("literal", np.nan):.3f})',
+    headline(fig, f'Searched QTabGAN ({f["quantum"]:.3f}), the Gaussian control ({f["gaussian"]:.3f}) and CTGAN '
+                  f'({f.get("ctgan", np.nan):.3f}) are tied on macro F1; all far above the literal paper settings '
+                  f'({f.get("literal", np.nan):.3f})',
              'Test split, 150 epochs. Square = mean, bar = ±1 SD, dots = individual seeds. Real reference: forest '
              'trained on real rows (left); real training rows used as synthetic data (right, single value).')
     save(fig, 'fig4_forest')
@@ -529,10 +529,10 @@ def fig6():
             if sd:
                 a.errorbar(i, v.mean(), yerr=sd, color='#333', capsize=4, lw=1.2)
             a.scatter(i + rng.uniform(-0.15, 0.15, len(v)), v, s=16, color='black', zorder=3, lw=0)
-            a.text(i, v.mean() + sd + 2, f'{v.mean():.0f}%' + ('\n(1 seed)' if len(v) == 1 else ''), ha='center',
+            a.text(i, max(v.max(), v.mean() + sd) + 2, f'{v.mean():.0f}%' + ('\n(1 seed)' if len(v) == 1 else ''), ha='center',
                    va='bottom', fontsize=11)
         a.axhline(100, color='#222', ls='--', lw=1.4)
-        a.text(len(models) - 0.5, 101.5, 'real data = 100%', ha='right', va='bottom', fontsize=10.5, color='#333')
+        a.text(-0.45, 101.5, 'real data = 100%', ha='left', va='bottom', fontsize=10.5, color='#333')
         a.set_xticks(range(len(models)), [SHORT[m].replace(' ', '\n', 1) for m in models])
         a.set(ylabel=f'{lab.splitlines()[0]} (% of real)', title=lab, ylim=(0, 125))
         a.grid(axis='x', visible=False)
@@ -612,6 +612,7 @@ def fig8():
         ('Noise into the circuit', f"angle encoding, U[0, {q['noise_scale']:.2f}π)", '-',
          'Two incompatible descriptions'),
         ('Initial circuit angles', '0.01 · N(0, 1)', '-', 'Uniform in [0, 2π)'),
+        ('Circuit output scaling', 'probabilities × 256 (mean 1)', '-', 'Not stated'),
         ('Numeric preprocessing', 'clip 1-99th pct, z-score, scale to [0, π]', 'same', 'Stated (we follow it)'),
         ('Seeds', '0-4', '0-4', 'Not stated'),
         ('How chosen', 'Optuna, 40 trials, validation split', 'Optuna, 40 trials, validation split', '-'),
@@ -738,7 +739,7 @@ def poster():
     x2 = 0.67
     heading(x2, 0.795, 'Fidelity and training')
     image(f'{OUT}/fig3_cdfs.png', [x2, 0.52, 0.31, 0.26])
-    image(f'{OUT}/fig1_training_300epochs.png', [x2, 0.30, 0.31, 0.21])
+    image(f'{OUT}/fig1_training_diagnostics.png', [x2, 0.30, 0.31, 0.21])
     heading(x2, 0.265, 'Conclusion')
     para(x2, 0.257, '(A) The paper\'s 0.2-point gap is matched only under a guessed\n    kNN evaluation, and best by the '
          'Gaussian control.\n(B) Searched QTabGAN and the Gaussian control are statistically\n    tied (p = 0.22-0.38); '

@@ -1,0 +1,11 @@
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+         acc     auc      f1
+lr    3.1016  0.0403  0.0353
+dt   10.5333  0.1548  0.1517
+rf    7.0120  0.0599  0.2080
+mlp   2.4670  0.0377  0.0343
+svm   3.3269  0.0539 -0.0508
+mean diff {'acc': 5.288156413143622, 'auc': 0.06932839436761744, 'f1': 0.07568914820020808} stat {'avg_wd': 0.01408291771787204, 'avg_jsd': 0.09756016884023348, 'diff_corr': 0.6320800333611899}

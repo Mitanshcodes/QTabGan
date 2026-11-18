@@ -1,0 +1,30 @@
+real rows for eval: 48842  generator train rows: 39073  held out: 9769
+params: {'generator_total': 159659, 'generator_quantum': 64, 'discriminator': 94209}
+epoch   10  G 0.709  D 1.403  60s
+epoch   20  G 0.703  D 1.387  121s
+epoch   30  G 0.690  D 1.402  186s
+epoch   40  G 0.725  D 1.390  247s
+epoch   50  G 0.778  D 1.352  308s
+epoch   60  G 0.752  D 1.384  381s
+epoch   70  G 0.701  D 1.389  452s
+epoch   80  G 0.697  D 1.402  524s
+epoch   90  G 0.707  D 1.386  593s
+epoch  100  G 0.726  D 1.378  658s
+epoch  110  G 0.712  D 1.367  725s
+epoch  120  G 0.886  D 1.317  789s
+epoch  130  G 1.071  D 1.593  853s
+epoch  140  G 0.890  D 1.327  919s
+epoch  150  G 0.764  D 1.329  984s
+/Users/mitansh/Downloads/qtabgan-repro/.venv/lib/python3.14/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (100) reached and the optimization hasn't converged yet.
+  warnings.warn(
+ML utility diff (real - synthetic):
+          acc     auc      f1
+lr   32.1834  0.1917  0.1732
+dt    5.3946  0.2275  0.2603
+rf   27.3825  0.5508  0.3817
+mlp  34.9370  0.2847  0.2757
+svm  33.2685  0.2447  0.1814
+mean diff: {'acc': 26.6332, 'auc': 0.2999, 'f1': 0.2545}
+stat_sim (CTAB-GAN+ defs): {'avg_wd': 0.0448, 'avg_jsd': 0.4656, 'diff_corr': 4.7631}
+paper-as-written defs: {'avg_js_divergence': 0.2769, 'avg_abs_pearson_diff': 0.3521}
+done in 1081s -> runs/teammate_style/paper_literal_s3

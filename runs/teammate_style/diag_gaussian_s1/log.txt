@@ -1,0 +1,33 @@
+real rows for eval: 39073  generator train rows: 31258  held out: 7815
+params: {'generator_total': 450155, 'generator_quantum': 0, 'discriminator': 94209}
+epoch   10  G 3.251  D -0.965  43s
+eval @ 10: f1 0.1272  jsd 0.1249  diff_corr 0.995
+epoch   20  G 6.673  D -0.891  98s
+eval @ 20: f1 0.0778  jsd 0.1013  diff_corr 0.640
+epoch   30  G 5.980  D -0.779  156s
+eval @ 30: f1 0.0953  jsd 0.0855  diff_corr 0.680
+epoch   40  G 5.679  D -0.697  224s
+eval @ 40: f1 0.1004  jsd 0.0863  diff_corr 0.619
+epoch   50  G 5.601  D -0.624  301s
+eval @ 50: f1 0.1057  jsd 0.0768  diff_corr 0.490
+epoch   60  G 5.442  D -0.579  374s
+eval @ 60: f1 0.1059  jsd 0.0675  diff_corr 0.567
+epoch   70  G 5.246  D -0.534  453s
+eval @ 70: f1 0.0968  jsd 0.0634  diff_corr 0.548
+epoch   80  G 5.029  D -0.506  546s
+eval @ 80: f1 0.0783  jsd 0.0578  diff_corr 0.535
+epoch   90  G 4.918  D -0.471  634s
+eval @ 90: f1 0.0762  jsd 0.0525  diff_corr 0.435
+epoch  100  G 4.870  D -0.441  721s
+eval @ 100: f1 0.0847  jsd 0.0511  diff_corr 0.370
+epoch  110  G 4.765  D -0.426  809s
+eval @ 110: f1 0.0904  jsd 0.0490  diff_corr 0.464
+epoch  120  G 4.642  D -0.411  904s
+eval @ 120: f1 0.1001  jsd 0.0394  diff_corr 0.573
+epoch  130  G 4.458  D -0.389  1000s
+eval @ 130: f1 0.0966  jsd 0.0456  diff_corr 0.368
+epoch  140  G 4.497  D -0.373  1095s
+eval @ 140: f1 0.0815  jsd 0.0386  diff_corr 0.376
+epoch  150  G 4.629  D -0.357  1202s
+eval @ 150: f1 0.1301  jsd 0.0376  diff_corr 0.327
+done in 1223s -> runs/teammate_style/diag_gaussian_s1
