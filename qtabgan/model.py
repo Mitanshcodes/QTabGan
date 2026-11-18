@@ -194,7 +194,7 @@ class QTabGAN:
         bce = nn.BCEWithLogitsLoss()
         t0 = time.time()
         for epoch in range(cfg.epochs):
-            gl, dl = [], []
+            gl, dl, qg = [], [], []
             for _ in range(steps):
                 for _ in range(cfg.d_steps):
                     idx = torch.randint(0, n, (cfg.batch_size,))
@@ -214,6 +214,9 @@ class QTabGAN:
                 lossG = bce(df, torch.ones_like(df)) if cfg.loss == 'bce' else -df.mean()
                 self.optG.zero_grad()
                 lossG.backward()
+                w = getattr(self.G.source, 'weights', None)
+                if w is not None and w.grad is not None:  # logging only: read before the step, no effect on training
+                    qg.append(float(w.grad.detach().norm()))
                 self.optG.step()
                 gl.append(lossG.item())
                 dl.append(lossD.item())
@@ -221,6 +224,8 @@ class QTabGAN:
                    'seconds': time.time() - t0}
             if hasattr(self.G.source, 'weights'):
                 rec['angle_norm'] = float(self.G.source.weights.detach().norm())
+            if qg:  # mean over the epoch's generator steps of the L2 norm of d lossG / d circuit angles
+                rec['angle_grad_norm'] = float(np.mean(qg))
             self.history.append(rec)
             if log_every and (epoch + 1) % log_every == 0:
                 print(f"epoch {epoch+1:4d}  G {rec['g_loss']:.3f}  D {rec['d_loss']:.3f}  "

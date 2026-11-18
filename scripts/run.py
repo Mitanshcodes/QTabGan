@@ -25,6 +25,7 @@ import torch  # noqa: E402
 
 from qtabgan.config import Config  # noqa: E402
 from qtabgan.data import Preprocessor, ctabgan_split, load  # noqa: E402
+from qtabgan.diagnostics import classifier_metrics, diversity_metrics  # noqa: E402
 from qtabgan.evaluate import ml_utility, paper_guess_utility, qtabgan_paper_metrics, stat_sim  # noqa: E402
 from qtabgan.model import QTabGAN  # noqa: E402
 
@@ -53,9 +54,12 @@ def parse():
     return ap.parse_args()
 
 
-def make_eval_callback(every, df, cat_cols):
+def make_eval_callback(every, df, cat_cols, holdout=None, spec=None):
     """Training-length curve. Uses the existing evaluate.py functions unchanged. Sampling draws from the
-    global torch RNG, so a run with --eval-every is not bit-identical to the same seed without it."""
+    global torch RNG, so a run with --eval-every is not bit-identical to the same seed without it.
+    With `holdout` (real rows the generator never trains on) it also records qtabgan.diagnostics
+    metrics: a 100-tree random forest trained on the synthetic table and scored on `holdout`, plus
+    diversity checks of the synthetic table against `df`."""
     if not every:
         return None
 
@@ -67,8 +71,14 @@ def make_eval_callback(every, df, cat_cols):
         ss = stat_sim(df, fake, cat_cols)
         model.history[-1].update({
             'eval_f1': float(ml_utility(df, [fake], classifiers=('lr', 'dt', 'rf')).mean()['f1']),
-            'eval_avg_jsd': ss['avg_jsd'], 'eval_diff_corr': ss['diff_corr'],
-            'eval_seconds': time.time() - t})
+            'eval_avg_jsd': ss['avg_jsd'], 'eval_diff_corr': ss['diff_corr']})
+        if holdout is not None:
+            tgt = spec['target']
+            model.history[-1].update({f'eval_{k}': v for k, v in
+                                      classifier_metrics(fake, holdout, tgt).items()})
+            model.history[-1].update({f'eval_{k}': v for k, v in diversity_metrics(
+                df, fake, spec['integer'], spec['categorical'], tgt).items()})
+        model.history[-1]['eval_seconds'] = time.time() - t
         with open(f'{model.out}/history.json', 'w') as fh:  # partial curve survives a crash
             json.dump(model.history, fh)
         print(f"eval @ {epoch}: f1 {model.history[-1]['eval_f1']:.4f}  jsd {ss['avg_jsd']:.4f}  "
@@ -100,7 +110,8 @@ def main():
     params = model.n_params()
     print('params:', params, flush=True)
     t0 = time.time()
-    model.fit(X, y, callback=make_eval_callback(a.eval_every, df, spec['categorical']))
+    model.fit(X, y, callback=make_eval_callback(a.eval_every, df, spec['categorical'],
+                                                holdout=test_df, spec=spec))
     train_secs = time.time() - t0
 
     fake = model.sample(len(df))
